@@ -18,11 +18,6 @@
                         <tr 
                             wire:click="$dispatch('openClassModal', {
                                 classId: {{ $class->id }},
-                                className: '{{ $class->class_name }}',
-                                topic: '{{ $class->course->name ?? 'N/A' }}',
-                                teacher: '{{ $class->teacher->name ?? 'N/A' }}',
-                                date: '{{ \Carbon\Carbon::parse($class->start_date)->format('d M Y') }}',
-                                time: '{{ \Carbon\Carbon::parse($class->class_time)->format('H:i') }}'
                             })" 
                             style="cursor:pointer;"
                         >                
@@ -47,21 +42,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Class Name:</strong> <span id="modal-class-name"></span></p>
-                    <p><strong>Topic:</strong> <span id="modal-topic"></span></p>
-                    <p><strong>Teacher:</strong> <span id="modal-teacher"></span></p>
-                    <p><strong>Date:</strong> <span id="modal-date"></span></p>
-                    <p><strong>Time:</strong> <span id="modal-time"></span></p>
-                    <p><strong style="margin-right:15px">Are Going To Attend:</strong>
+                    <p><strong>Class Name:</strong> <span>{{ $modalData['className'] }}</span></p>
+                    <p><strong>Topic:</strong> <span>{{ $modalData['topic'] }}</span></p>
+                    <p><strong>Teacher:</strong> <span>{{ $modalData['teacher'] }}</span></p>
+                    <p><strong>Date:</strong> <span>{{ $modalData['date'] }}</span></p>
+                    <p><strong>Time:</strong> <span>{{ $modalData['time'] }}</span></p>
+                    <p><strong style="margin-right:15px">Are Going To Attend: </strong>
                         <span style="display: inline-flex; gap: 25px;" class="ml-3">
-                            <a wire:click="attendClass" style="cursor: pointer;">
-                                <i class="fa-solid fa-check text-success"></i>
-                            </a>
-                            <a wire:click="missClass" style="cursor: pointer;">
-                                <i class="fa-solid fa-x text-danger"></i>
-                            </a>
+                        <a style="cursor: pointer;" wire:click='attendClass'><i class="fa-solid fa-check text-success"></i></a>
+                        <a style="cursor: pointer;" wire:click='missClass'><i class="fa-solid fa-x text-danger"></i></a>
                         </span>
-                    </p> 
+                    </p>              
                 </div>
             </div>
         </div>
@@ -69,16 +60,21 @@
 </div>
 
 <script>
-    Livewire.on('openClassModal', ({ classId, className, topic, teacher, date, time }) => {
-        Livewire.dispatch('setSelectedClass', { classId });
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('openClassModal', ({ classId }) => {
+            // Just dispatch the setSelectedClass event
+            Livewire.dispatch('setSelectedClass', { classId });
+            
+            // Show modal after a brief delay
+            setTimeout(() => {
+                const modal = new bootstrap.Modal(document.getElementById('classModal'));
+                modal.show();
+            }, 100);
+        });
+    });
 
-        document.getElementById('modal-class-name').textContent = className;
-        document.getElementById('modal-topic').textContent = topic;
-        document.getElementById('modal-teacher').textContent = teacher;
-        document.getElementById('modal-date').textContent = date;
-        document.getElementById('modal-time').textContent = time;
-
-        const modal = new bootstrap.Modal(document.getElementById('classModal'));
-        modal.show();
+    window.addEventListener('closeClassModal', () => {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('classModal'));
+        modal.hide();
     });
 </script>

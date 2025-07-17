@@ -62,12 +62,25 @@
 
 <!-- Bootstrap Modal Listener Script -->
 <script>
-    Livewire.on('openAddClassModal', () => {
-        var modal = new bootstrap.Modal(document.getElementById('addClassModal'));
-        modal.show();
-    });
-    Livewire.on('closeAddClassModal', () => {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('addClassModal'));
-        modal.hide();
+    document.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('openAddClassModal', () => {
+            try {
+                const modal = new bootstrap.Modal(document.getElementById('addClassModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error opening add modal:', error);
+            }
+        });
+
+        window.addEventListener('closeAddClassModal', () => {
+            try {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addClassModal'));
+                if (modal) {
+                    modal.hide();
+                }
+            } catch (error) {
+                console.error('Error closing add modal:', error);
+            }
+        });
     });
 </script>

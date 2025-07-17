@@ -11,11 +11,20 @@ use App\Models\NewClass;
 use App\Models\ClassAttendance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\On;
 
 class UpcomingClass extends Component
 {
     public $upcomingClasses = [];
     public $selectedClassId;
+
+    public $modalData = [
+        'className' => '',
+        'topic' => '',
+        'teacher' => '',
+        'date' => '',
+        'time' => ''
+    ];
 
     #[Layout('layouts.student-app')]
     public function render()
@@ -37,9 +46,23 @@ class UpcomingClass extends Component
         return view('livewire.upcoming-class');
     }
 
+    #[On('setSelectedClass')]
     public function setSelectedClass($classId)
     {
         $this->selectedClassId = $classId;
+        // Find the class and set modal data
+        $class = collect($this->upcomingClasses)->firstWhere('id', $classId);
+        if ($class) {
+            $this->modalData = [
+                'className' => $class->class_name,
+                'topic' => $class->course->name ?? 'N/A',
+                'teacher' => $class->teacher->name ?? 'N/A',
+                'date' => Carbon::parse($class->start_date)->format('d M Y'),
+                'time' => Carbon::parse($class->class_time)->format('H:i')
+            ];
+        }
+        
+        logger('Selected class set: '.$classId);
     }
 
     public function attendClass()
@@ -60,11 +83,13 @@ class UpcomingClass extends Component
         } elseif ($attendance->attended === '0') {
             $attendance->update(['attended' => '1']);
         }
+        $this->dispatch('closeClassModal');
     }
 
     public function missClass()
     {
         $studentId = Auth::id();
+        // dd($this->selectedClassId, $studentId);
         if (!$this->selectedClassId || !$studentId) return;
 
         $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
@@ -80,6 +105,6 @@ class UpcomingClass extends Component
         } elseif ($attendance->attended === '1') {
             $attendance->update(['attended' => '0']);
         }
+        $this->dispatch('closeClassModal');
     }
-
 }

@@ -16,7 +16,7 @@
             <button wire:click="$dispatch('openAddQuestionModal')" class="btn btn-success">Add New Question</button>
 
             <!-- Modal for insert Question -->
-            <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+            <div wire:ignore class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content p-3">
                         <div class="modal-header">
@@ -33,7 +33,7 @@
     </div>
 
     <!-- Modal for update Question -->
-    <div class="modal fade" id="updateQuestionModal" tabindex="-1" aria-labelledby="updateQuestionModalLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="updateQuestionModal" tabindex="-1" aria-labelledby="updateQuestionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content p-3">
                 <div class="modal-header">
@@ -161,21 +161,57 @@
 
 <!-- Bootstrap Modal Listener Script -->
 <script>
-    Livewire.on('openAddQuestionModal', () => {
-        var modal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
-        modal.show();
-    });
-    Livewire.on('closeAddQuestionModal', () => {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
-        modal.hide();
-    });
-    window.addEventListener('openUpdateQuestionModal', () => {
-        console.log('Update Modal Event Fired');
-        var modal = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
-        modal.show();
-    });
-    window.addEventListener('closeUpdateQuestionModal', () => {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
-        modal.hide();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add Question Modal Events
+        window.addEventListener('openAddQuestionModal', () => {
+            try {
+                const modal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error opening add modal:', error);
+            }
+        });
+
+        window.addEventListener('closeAddQuestionModal', () => {
+            try {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
+                if (modal) {
+                    modal.hide();
+                }
+            } catch (error) {
+                console.error('Error closing add modal:', error);
+            }
+        });
+
+        // Update Question Modal Events
+        window.addEventListener('openUpdateQuestionModal', () => {
+            try {
+                console.log('Update Modal Event Fired');
+                const modal = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error opening update modal:', error);
+            }
+        });
+        
+        window.addEventListener('closeUpdateQuestionModal', () => {
+            try {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
+                if (modal) {
+                    modal.hide();
+                }
+            } catch (error) {
+                console.error('Error closing update modal:', error);
+            }
+        });
+
+        // Handle Livewire events
+        // window.addEventListener('resetAddForm', () => {
+        //     window.Livewire.dispatch('resetAddForm');
+        // });
+
+        // window.addEventListener('resetUpdateForm', () => {
+        //     window.Livewire.dispatch('resetUpdateForm');
+        // });
     });
 </script>
