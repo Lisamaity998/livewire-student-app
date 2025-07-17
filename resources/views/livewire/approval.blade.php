@@ -11,7 +11,7 @@
     @endsession
     <div class="content-header">
         <h1 class="content-title">Approval</h1>
-        <input type="text" class="form-control" style="margin-bottom:30px; width:15rem" placeholder="Search Student hare" wire:model.live.debounce.400ms="search">
+        <input type="text" id="searchStudent" class="form-control" style="margin-bottom:30px; width:15rem" placeholder="Search Student hare" wire:model.live.debounce.400ms="search">
     </div>
     <div class="student-table">
         <table class="table">

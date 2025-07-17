@@ -14,19 +14,65 @@
         <!-- Parent Blade View -->
         <div>
             <button wire:click="$dispatch('openAddQuestionModal')" class="btn btn-success">Add New Question</button>
+        </div>
+    </div>
 
-            <!-- Modal for insert Question -->
-            <div wire:ignore class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content p-3">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Add New Question</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <livewire:question-entry />
-                        </div>
-                    </div>
+    <div class="student-table">
+        <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Topic</th>
+                <th>Question</th>
+                <th>Option A</th>
+                <th>Option B</th>
+                <th>Option C</th>
+                <th>Option D</th>
+                <th>Correct Answer</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+                @forelse ($questions as $index => $question)
+                    <tr>
+                        <th scope="row">{{ $index + 1 }}</th>
+                        <td>{{ $question->course->name ?? 'N/A' }}</td>
+                        <td>{{ $question->question_name }}</td>
+                        <td>{{ $question->answer1 }}</td>
+                        <td>{{ $question->answer2 }}</td>
+                        <td>{{ $question->answer3 }}</td>
+                        <td>{{ $question->answer4 }}</td>
+                        <td>{{ $question->correct_answer }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="#" class="text-success me-2" style="cursor: pointer" wire:click.prevent="editQuestion({{ $question->id }})">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="text-danger me-2" style="cursor: pointer" wire:click.prevent="deleteQuestion({{ $question->id }})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="9" class="text-center">No Data Found</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for insert Question -->
+    <div wire:ignore class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content p-3">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Question</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <livewire:question-entry />
                 </div>
             </div>
         </div>
@@ -101,7 +147,7 @@
                                     @enderror
                                 </div>
                                 <div class="d-flex justify-content-center align-items-center">
-                                    <button type="submit" class="btn btn-success mt-3">Save Question</button>
+                                    <button type="submit" class="btn btn-success mt-3">Save Update</button>
                                 </div>
                             </form>
                         </div>
@@ -110,53 +156,6 @@
             </div>
         </div>
     </div>
-
-    <div class="student-table">
-        <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Topic</th>
-                <th>Question</th>
-                <th>Option A</th>
-                <th>Option B</th>
-                <th>Option C</th>
-                <th>Option D</th>
-                <th>Correct Answer</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-                @forelse ($questions as $index => $question)
-                    <tr>
-                        <th scope="row">{{ $index + 1 }}</th>
-                        <td>{{ $question->course->name ?? 'N/A' }}</td>
-                        <td>{{ $question->question_name }}</td>
-                        <td>{{ $question->answer1 }}</td>
-                        <td>{{ $question->answer2 }}</td>
-                        <td>{{ $question->answer3 }}</td>
-                        <td>{{ $question->answer4 }}</td>
-                        <td>{{ $question->correct_answer }}</td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="#" class="text-success me-2" style="cursor: pointer" wire:click.prevent="editQuestion({{ $question->id }})">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" class="text-danger me-2" style="cursor: pointer" wire:click.prevent="deleteQuestion({{ $question->id }})">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="9" class="text-center">No Data Found</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    {{-- {{dd($this->course_id, $this->question_name, $this->answer1, $this->answer2, $this->answer3, $this->answer4, $this->correct_answer);}} --}}
 </div>
 
 <!-- Bootstrap Modal Listener Script -->
@@ -165,8 +164,8 @@
         // Add Question Modal Events
         window.addEventListener('openAddQuestionModal', () => {
             try {
-                const modal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
-                modal.show();
+                var modal2 = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+                modal2.show();
             } catch (error) {
                 console.error('Error opening add modal:', error);
             }
@@ -174,9 +173,9 @@
 
         window.addEventListener('closeAddQuestionModal', () => {
             try {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
-                if (modal) {
-                    modal.hide();
+                var modal3 = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
+                if (modal3) {
+                    modal3.hide();
                 }
             } catch (error) {
                 console.error('Error closing add modal:', error);
@@ -186,9 +185,8 @@
         // Update Question Modal Events
         window.addEventListener('openUpdateQuestionModal', () => {
             try {
-                console.log('Update Modal Event Fired');
-                const modal = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
-                modal.show();
+                var modal45 = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
+                modal45.show();
             } catch (error) {
                 console.error('Error opening update modal:', error);
             }
@@ -196,9 +194,9 @@
         
         window.addEventListener('closeUpdateQuestionModal', () => {
             try {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
-                if (modal) {
-                    modal.hide();
+                var modal5 = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
+                if (modal5) {
+                    modal5.hide();
                 }
             } catch (error) {
                 console.error('Error closing update modal:', error);

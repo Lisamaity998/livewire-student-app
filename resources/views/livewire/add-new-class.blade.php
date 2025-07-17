@@ -20,7 +20,7 @@
                     @enderror
                 </div>
                 <div class="form-group mb-3">
-                    <label for="Choose Date">Choose Date</label>
+                    <label for="ChooseDate">Choose Date</label>
                     <input type="date" id="ChooseDate" wire:model.lazy="selected_date" min="{{ now()->toDateString() }}" class="form-control">
                     @error('selected_date') 
                         <p class="text-danger">{{ $message }}</p>

@@ -1,4 +1,20 @@
 <div>
+    @session('success')
+        <div class="alert alert-success" role="alert">
+            {{ $value }}
+        </div>
+    @endsession
+    @session('error')
+        <div class="alert alert-danger" role="alert">
+            {{ $value }}
+        </div>
+    @endsession
+    @session('warning')
+        <div class="alert alert-warning" role="alert">
+            {{ $value }}
+        </div>
+    @endsession
+
     <div class="content-header">
         <h1 class="content-title">Upcoming Classes</h1>
     </div>
@@ -11,19 +27,18 @@
                         <th>Class Name</th>
                         <th>Teacher</th>
                         <th>Date</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($upcomingClasses as $class)
-                        <tr 
-                            wire:click="$dispatch('openClassModal', {
-                                classId: {{ $class->id }},
-                            })" 
-                            style="cursor:pointer;"
-                        >
+                        <tr>
                             <td>{{ $class->class_name }}</td>
                             <td>{{ $class->teacher->name ?? 'N/A' }}</td>
                             <td>{{ \Carbon\Carbon::parse($class->start_date)->format('d M Y') }}</td>
+                            <td>
+                                <button class="btn btn-primary" wire:click="$dispatch('openClassModal', { classId: {{ $class->id }} })">View Details</button>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

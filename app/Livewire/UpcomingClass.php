@@ -42,7 +42,6 @@ class UpcomingClass extends Component
                 ->orderBy('start_date')
                 ->get();
         }
-
         return view('livewire.upcoming-class');
     }
 
@@ -61,50 +60,57 @@ class UpcomingClass extends Component
                 'time' => Carbon::parse($class->class_time)->format('H:i')
             ];
         }
-        
-        logger('Selected class set: '.$classId);
     }
 
     public function attendClass()
     {
-        $studentId = Auth::id();
-        if (!$this->selectedClassId || !$studentId) return;
+        try {
+            $studentId = Auth::id();
+            if (!$this->selectedClassId || !$studentId) return;
 
-        $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
-            ->where('student_id', $studentId)
-            ->first();
+            $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
+                ->where('student_id', $studentId)
+                ->first();
 
-        if (!$attendance) {
-            ClassAttendance::create([
-                'class_id' => $this->selectedClassId,
-                'student_id' => $studentId,
-                'attended' => '1',
-            ]);
-        } elseif ($attendance->attended === '0') {
-            $attendance->update(['attended' => '1']);
+            if (!$attendance) {
+                ClassAttendance::create([
+                    'class_id' => $this->selectedClassId,
+                    'student_id' => $studentId,
+                    'attended' => '1',
+                ]);
+            } elseif ($attendance->attended === '0') {
+                $attendance->update(['attended' => '1']);
+            }
+            session()->flash('success', 'You’ve successfully marked your interest to attend the class.');
+            $this->dispatch('closeClassModal');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Oops! We couldn’t save your interest to attend the class. Please try again later.');
         }
-        $this->dispatch('closeClassModal');
     }
 
     public function missClass()
     {
-        $studentId = Auth::id();
-        // dd($this->selectedClassId, $studentId);
-        if (!$this->selectedClassId || !$studentId) return;
+        try{
+            $studentId = Auth::id();
+            if (!$this->selectedClassId || !$studentId) return;
 
-        $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
-            ->where('student_id', $studentId)
-            ->first();
+            $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
+                ->where('student_id', $studentId)
+                ->first();
 
-        if (!$attendance) {
-            ClassAttendance::create([
-                'class_id' => $this->selectedClassId,
-                'student_id' => $studentId,
-                'attended' => '0',
-            ]);
-        } elseif ($attendance->attended === '1') {
-            $attendance->update(['attended' => '0']);
+            if (!$attendance) {
+                ClassAttendance::create([
+                    'class_id' => $this->selectedClassId,
+                    'student_id' => $studentId,
+                    'attended' => '0',
+                ]);
+            } elseif ($attendance->attended === '1') {
+                $attendance->update(['attended' => '0']);
+            }
+            session()->flash('warning', 'You’ve successfully marked your decision to miss the class.');
+            $this->dispatch('closeClassModal');
+        }catch (\Exception $e) {
+            session()->flash('error', 'Oops! We couldn’t save your decision to miss the class. Please try again later.');
         }
-        $this->dispatch('closeClassModal');
     }
 }

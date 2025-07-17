@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use App\Models\Course;
 use App\Models\Teacher;
@@ -73,12 +72,12 @@ class AddNewClass extends Component
                 }
             }
         }
-
-        session()->flash('success', 'New class added successfully!');
         $this->reset();
+        $this->dispatch('closeAddClassModal');
+        $this->dispatch('classAdded');
+        session()->flash('success', 'New class added successfully!');
     }
 
-    #[Layout('layouts.app')]
     public function render()
     {
         return view('livewire.add-new-class', [

@@ -64,8 +64,8 @@ class ViewQuestions extends Component
             $question = Questions::find($id);
             if ($question) {
                 $question->delete();
-                session()->flash('success', 'Question deleted successfully!');
                 $this->refreshQuestions();
+                session()->flash('success', 'Question deleted successfully!');
             } else {
                 session()->flash('error', 'Question not found.');
             }
@@ -120,17 +120,16 @@ class ViewQuestions extends Component
                     'correct_answer' => $this->correct_answer,
                 ]);
                 
-                session()->flash('success', 'Question updated successfully!');
-                
-                // Close modal
-                $this->dispatch('closeUpdateQuestionModal');
-                
                 // Reset form
                 $this->resetUpdateForm();
 
+                // Close modal
+                $this->dispatch('closeUpdateQuestionModal');
+
                 // Refresh questions list
-                $this->refreshQuestions();
-                
+                // $this->refreshQuestions();
+
+                session()->flash('success', 'Question updated successfully!');
             } else {
                 session()->flash('error', 'Question not found.');
             }
