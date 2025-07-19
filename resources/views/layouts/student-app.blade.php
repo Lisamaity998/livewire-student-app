@@ -19,6 +19,7 @@
             <li><a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}" wire:navigate>Dashboard</a></li>
             <li><a href="{{ route('live.class') }}" class="{{ request()->routeIs('live.class') ? 'active' : '' }}" wire:navigate>Ongoing Classes</a></li>
             <li><a href="{{ route('upcoming.class') }}" class="{{ request()->routeIs('upcoming.class') ? 'active' : '' }}" wire:navigate>Upcoming Classes</a></li>
+            <li><a href="{{ route('mock.test') }}" class="{{ request()->routeIs('mock.test') ? 'active' : '' }}" wire:navigate>Mock Test</a></li>
         </ul>
         <div class="sidebar-footer">
             <form>
