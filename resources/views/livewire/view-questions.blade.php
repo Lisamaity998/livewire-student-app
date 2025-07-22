@@ -185,8 +185,8 @@
         // Update Question Modal Events
         window.addEventListener('openUpdateQuestionModal', () => {
             try {
-                var modal45 = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
-                modal45.show();
+                var modal4 = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
+                modal4.show();
             } catch (error) {
                 console.error('Error opening update modal:', error);
             }

@@ -14,6 +14,18 @@ class TestResult extends Model
         'course_id',
         'test_date',
         'start_time',
+        'total_questions',
         'score',
+        'status', // in_progress or submitted
     ];      
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo(StudentInformation::class, 'student_id');
+    }
 }

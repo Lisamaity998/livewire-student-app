@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('course_id');
             $table->date('test_date');
             $table->time('start_time');
+            $table->integer('total_questions');
             $table->integer('score'); // obtained marks
             $table->timestamps();
         });

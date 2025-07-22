@@ -20,6 +20,7 @@
             <li><a href="{{ route('live.class') }}" class="{{ request()->routeIs('live.class') ? 'active' : '' }}" wire:navigate>Ongoing Classes</a></li>
             <li><a href="{{ route('upcoming.class') }}" class="{{ request()->routeIs('upcoming.class') ? 'active' : '' }}" wire:navigate>Upcoming Classes</a></li>
             <li><a href="{{ route('mock.test') }}" class="{{ request()->routeIs('mock.test') ? 'active' : '' }}" wire:navigate>Mock Test</a></li>
+            <li><a href="{{ route('test.results') }}" class="{{ request()->routeIs('test.results') ? 'active' : '' }}" wire:navigate>Test Results</a></li>
         </ul>
         <div class="sidebar-footer">
             <form>

@@ -1,24 +1,21 @@
 <div>
     @session('success')
-        <div class="alert alert-success" role="alert">
-            {{ $value }}
-        </div>
+        <div class="alert alert-success">{{ $value }}</div>
     @endsession
     @session('error')
-        <div class="alert alert-danger" role="alert">
-            {{ $value }}
-        </div>
+        <div class="alert alert-danger">{{ $value }}</div>
     @endsession
 
-    <div class="content-header">
+    <div class="content-header mb-4">
         <h1 class="content-title">Mock Test</h1>
     </div>
 
     <div class="student-table">
+
         {{-- Subject Selection --}}
-        @unless($testStarted)
-            <div class="p-4">
-                <h5 class="mb-3">Please select a subject to give test</h5>
+        @if (!$testStarted && !$testSubmitted)
+            <div class="p-4 border rounded">
+                <h5 class="mb-3">Please select a subject to begin the test</h5>
 
                 <div class="mb-3">
                     <label class="form-label">Select Subject</label>
@@ -31,48 +28,62 @@
                 </div>
 
                 @if ($selectedSubjectId)
-                    <button wire:click="startTest" class="btn btn-primary mt-2">
-                        Start Test
-                    </button>
+                    @if ($hasQuestions)
+                        <button wire:click="startTest" class="btn btn-primary mt-2">
+                            Start Test
+                        </button>
+                    @else
+                        <div class="alert alert-warning mt-2">
+                            Test is not available for this subject. Please select another.
+                        </div>
+                    @endif
                 @endif
             </div>
-        @endunless
+        @endif
 
         {{-- Test UI --}}
-        @if($testStarted && !$testSubmitted)
-            <div class="mt-4">
-                <h5>Question {{ $currentIndex + 1 }} of {{ count($questions) }}</h5>
-                <p class="fw-bold">{{ $questions[$currentIndex]->question_name }}</p>
+        @if ($testStarted && !$testSubmitted)
+            <div wire:poll.1s="checkTimerAndSubmitIfExpired">
+                <div class="alert alert-info text-center">
+                    Time Remaining: <strong>{{ gmdate("i:s", $remainingTime) }}</strong>
+                </div>
 
-                @foreach (['answer1', 'answer2', 'answer3', 'answer4'] as $option)
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                            wire:model="answers.{{ $currentIndex }}"
-                            value="{{ $questions[$currentIndex]->$option }}"
-                            id="{{ $option }}">
-                        <label class="form-check-label" for="{{ $option }}">
-                            {{ $questions[$currentIndex]->$option }}
-                        </label>
+                <div class="mt-4">
+                    <h5>Question {{ $currentIndex + 1 }} of {{ count($questions) }}</h5>
+                    <p class="fw-bold">{{ $questions[$currentIndex]->question_name }}</p>
+
+                    @foreach (['answer1', 'answer2', 'answer3', 'answer4'] as $option)
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                type="radio"
+                                wire:model.live="answers.{{ $currentIndex }}"
+                                value="{{ $questions[$currentIndex]->$option }}"
+                                id="question{{ $currentIndex }}_{{ $option }}">
+                            <label class="form-check-label" for="question{{ $currentIndex }}_{{ $option }}">
+                                {{ $questions[$currentIndex]->$option }}
+                            </label>
+                        </div>
+                    @endforeach
+
+                    <div class="mt-3 d-flex justify-content-between">
+                        @if ($currentIndex > 0)
+                            <button class="btn btn-secondary" wire:click="previous">Previous</button>
+                        @else
+                            <span></span>
+                        @endif
+
+                        @if ($currentIndex < count($questions) - 1)
+                            <button wire:click="next" class="btn btn-primary">Next</button>
+                        @else
+                            <button wire:click="submit" class="btn btn-success">Submit</button>
+                        @endif
                     </div>
-                @endforeach
-
-                <div class="mt-3 d-flex justify-content-between">
-                    <button wire:click="previous" class="btn btn-secondary"
-                        @disabled($currentIndex == 0)>
-                        Previous
-                    </button>
-
-                    @if($currentIndex < count($questions) - 1)
-                        <button wire:click="next" class="btn btn-primary">Next</button>
-                    @else
-                        <button wire:click="submit" class="btn btn-success">Submit</button>
-                    @endif
                 </div>
             </div>
         @endif
 
         {{-- Result UI --}}
-        @if($testSubmitted)
+        @if ($testSubmitted)
             <div class="mt-4">
                 <h4 class="text-success">Test Completed!</h4>
                 @php
@@ -80,10 +91,10 @@
                 @endphp
                 <h5 class="fw-bold">Your Score: {{ $percentage }}%</h5>
 
-                <table class="table mt-4">
+                <table class="table table-bordered mt-4">
                     <thead>
                         <tr>
-                            <th>Q#</th>
+                            <th>#</th>
                             <th>Question</th>
                             <th>Your Answer</th>
                             <th>Correct Answer</th>
@@ -95,10 +106,10 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $question->question_name }}</td>
-                                <td>{{ $answers[$index] }}</td>
+                                <td>{{ $answers[$index] ?? '-' }}</td>
                                 <td>{{ $question->correct_answer }}</td>
                                 <td>
-                                    @if (($answers[$index]) == $question->correct_answer)
+                                    @if (($answers[$index] ?? '') == $question->correct_answer)
                                         ✅ Correct
                                     @else
                                         ❌ Wrong
@@ -108,6 +119,10 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <div class="d-flex justify-content-center mt-3">
+                    <a href="{{ route('mock.test') }}" class="{{ request()->routeIs('mock.test') ? 'active' : '' }} btn btn-primary" wire:navigate>Exit</a>
+                </div>
             </div>
         @endif
     </div>

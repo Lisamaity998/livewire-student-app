@@ -9,6 +9,8 @@ use App\Livewire\UpcomingClass;
 use App\Livewire\ViewUpcomingClass;
 use App\Livewire\ViewQuestions;
 use App\Livewire\MockTest;
+use App\Livewire\TestResults;
+use App\Livewire\StudentsTestResults;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +36,7 @@ Route::middleware(['auth:student'])->group(function () {
     Route::get('student/live_class', LiveClass::class)->name('live.class');
     Route::get('student/upcoming_class', UpcomingClass::class)->name('upcoming.class');
     Route::get('student/mock_test', MockTest::class)->name('mock.test');
+    Route::get('student/test_results', TestResults::class)->name('test.results');
 });
 
 Route::get('/studentLogout', function () {
@@ -50,6 +53,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('admin/student_list', StudentList::class)->name('student.list');
     Route::get('admin/view_upcoming_class', ViewUpcomingClass::class)->name('view.upcoming.class');
     Route::get('admin/view_question', ViewQuestions::class)->name('view.question');
+    Route::get('admin/students_test_results', StudentsTestResults::class)->name('students.test.results');
 });
 
 Route::get('/logout', function () {

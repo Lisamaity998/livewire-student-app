@@ -20,6 +20,7 @@
             <li><a href="{{ route('student.list') }}" class="{{ request()->routeIs('student.list') ? 'active' : '' }}" wire:navigate>Student List</a></li>
             <li><a href="{{ route('view.upcoming.class') }}" class="{{ request()->routeIs('view.upcoming.class') ? 'active' : '' }}" wire:navigate>Class</a></li>
             <li><a href="{{ route('view.question') }}" class="{{ request()->routeIs('view.question') ? 'active' : '' }}" wire:navigate>Question</a></li>
+            <li><a href="{{ route('students.test.results') }}" class="{{ request()->routeIs('students.test.results') ? 'active' : '' }}" wire:navigate>Students Test Results</a></li>
         </ul>
         <div class="sidebar-footer">
             <form>
