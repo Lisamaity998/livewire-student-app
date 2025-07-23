@@ -64,11 +64,11 @@
     </div>
 
     <!-- Modal for insert Question -->
-    <div wire:ignore class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content p-3">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add New Question</h5>
+                    <h5 class="modal-title" id="addQuestionModalLabel">Add New Question</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -83,7 +83,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content p-3">
                 <div class="modal-header">
-                    <h5 class="modal-title">Update Question</h5>
+                    <h5 class="modal-title" id="updateQuestionModalLabel">Update Question</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -159,57 +159,47 @@
 </div>
 
 <!-- Bootstrap Modal Listener Script -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add Question Modal Events
-        window.addEventListener('openAddQuestionModal', () => {
-            try {
-                var modal2 = new bootstrap.Modal(document.getElementById('addQuestionModal'));
-                modal2.show();
-            } catch (error) {
-                console.error('Error opening add modal:', error);
-            }
-        });
-
-        window.addEventListener('closeAddQuestionModal', () => {
-            try {
-                var modal3 = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
-                if (modal3) {
-                    modal3.hide();
-                }
-            } catch (error) {
-                console.error('Error closing add modal:', error);
-            }
-        });
-
-        // Update Question Modal Events
-        window.addEventListener('openUpdateQuestionModal', () => {
-            try {
-                var modal4 = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
-                modal4.show();
-            } catch (error) {
-                console.error('Error opening update modal:', error);
-            }
-        });
-        
-        window.addEventListener('closeUpdateQuestionModal', () => {
-            try {
-                var modal5 = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
-                if (modal5) {
-                    modal5.hide();
-                }
-            } catch (error) {
-                console.error('Error closing update modal:', error);
-            }
-        });
-
-        // Handle Livewire events
-        // window.addEventListener('resetAddForm', () => {
-        //     window.Livewire.dispatch('resetAddForm');
-        // });
-
-        // window.addEventListener('resetUpdateForm', () => {
-        //     window.Livewire.dispatch('resetUpdateForm');
-        // });
+{{-- <script>
+    // Add Question Modal Events
+    window.addEventListener('openAddQuestionModal', () => {
+        // alert('Opening Add Question Modal');
+        try {
+            var modal2 = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+            modal2.show();
+        } catch (error) {
+            console.error('Error opening add modal:', error);
+        }
     });
-</script>
+
+    window.addEventListener('closeAddQuestionModal', () => {
+        try {
+            var modal3 = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
+            if (modal3) {
+                modal3.hide();
+            }
+        } catch (error) {
+            console.error('Error closing add modal:', error);
+        }
+    });
+    
+    // Update Question Modal Events
+    window.addEventListener('openUpdateQuestionModal', () => {
+        try {
+            var modal4 = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
+            modal4.show();
+        } catch (error) {
+            console.error('Error opening update modal:', error);
+        }
+    });
+    
+    window.addEventListener('closeUpdateQuestionModal', () => {
+        try {
+            var modal5 = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
+            if (modal5) {
+                modal5.hide();
+            }
+        } catch (error) {
+            console.error('Error closing update modal:', error);
+        }
+    });
+</script> --}}

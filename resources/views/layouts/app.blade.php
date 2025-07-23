@@ -39,5 +39,87 @@
     
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script>
+        // Helper to forcefully clean up Bootstrap modal artifacts
+        function removeModalArtifacts() {
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style = ''; // Reset any overflow hidden or padding
+        }
+
+        // Class Modal
+        window.addEventListener('openAddClassModal', () => {
+            try {
+                var modal = new bootstrap.Modal(document.getElementById('addClassModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error opening add modal:', error);
+            }
+        });
+
+        window.addEventListener('closeAddClassModal', () => {
+            try {
+                var modal1 = bootstrap.Modal.getInstance(document.getElementById('addClassModal'));
+                if (modal1) {
+                    modal1.hide();
+                }
+                // clean up the backdrop
+                setTimeout(removeModalArtifacts, 300);
+            } catch (error) {
+                console.error('Error closing add modal:', error);
+            }
+        });
+
+        // Add Question Modal Events
+        window.addEventListener('openAddQuestionModal', () => {
+            try {
+                var modal2 = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+                modal2.show();
+            } catch (error) {
+                console.error('Error opening add modal:', error);
+            }
+        });
+
+        window.addEventListener('closeAddQuestionModal', () => {
+            try {
+                var modal3 = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
+                if (modal3) {
+                    modal3.hide();
+                }
+                // clean up the backdrop
+                setTimeout(removeModalArtifacts, 300);
+            } catch (error) {
+                console.error('Error closing add modal:', error);
+            }
+        });
+
+        // Update Question Modal Events
+        window.addEventListener('openUpdateQuestionModal', () => {
+            try {
+                var modal4 = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
+                modal4.show();
+            } catch (error) {
+                console.error('Error opening update modal:', error);
+            }
+        });
+
+        window.addEventListener('closeUpdateQuestionModal', () => {
+            try {
+                var modal5 = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
+                if (modal5) {
+                    modal5.hide();
+                }
+                // clean up the backdrop
+                setTimeout(removeModalArtifacts, 300);
+            } catch (error) {
+                console.error('Error closing update modal:', error);
+            }
+        });
+
+        // On component switch (Livewire navigate), always clean up lingering backdrops
+        document.addEventListener('livewire:navigated', () => {
+            removeModalArtifacts();
+        });
+    </script>
 </body>
 </html>

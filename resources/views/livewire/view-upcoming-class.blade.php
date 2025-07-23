@@ -63,11 +63,11 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content p-3">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add New Class</h5>
+                    <h5 class="modal-title" id="addClassModalLabel">Add New Class</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -79,26 +79,24 @@
 </div>
 
 <!-- Bootstrap Modal Listener Script -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        window.addEventListener('openAddClassModal', () => {
-            try {
-                var modal = new bootstrap.Modal(document.getElementById('addClassModal'));
-                modal.show();
-            } catch (error) {
-                console.error('Error opening add modal:', error);
-            }
-        });
-
-        window.addEventListener('closeAddClassModal', () => {
-            try {
-                var modal1 = bootstrap.Modal.getInstance(document.getElementById('addClassModal'));
-                if (modal1) {
-                    modal1.hide();
-                }
-            } catch (error) {
-                console.error('Error closing add modal:', error);
-            }
-        });
+{{-- <script>
+    window.addEventListener('openAddClassModal', () => {
+        try {
+            var modal = new bootstrap.Modal(document.getElementById('addClassModal'));
+            modal.show();
+        } catch (error) {
+            console.error('Error opening add modal:', error);
+        }
     });
-</script>
+
+    window.addEventListener('closeAddClassModal', () => {
+        try {
+            var modal1 = bootstrap.Modal.getInstance(document.getElementById('addClassModal'));
+            if (modal1) {
+                modal1.hide();
+            }
+        } catch (error) {
+            console.error('Error closing add modal:', error);
+        }
+    });
+</script> --}}
