@@ -16,7 +16,6 @@ class TestResult extends Model
         'start_time',
         'total_questions',
         'score',
-        'status', // in_progress or submitted
     ];      
 
     public function course()

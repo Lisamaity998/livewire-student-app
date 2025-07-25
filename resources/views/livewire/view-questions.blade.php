@@ -12,8 +12,9 @@
     <div class="content-header">
         <h1 class="content-title">Questions List</h1>
         <!-- Parent Blade View -->
-        <div>
+        <div class="d-flex justify-content-between align-items-center">
             <button wire:click="$dispatch('openAddQuestionModal')" class="btn btn-success">Add New Question</button>
+            <button class="btn btn-primary" wire:click="$dispatch('openBulkAddQuestionModal')">Upload Bulk Questions</button>
         </div>
     </div>
 
@@ -156,50 +157,96 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal for upload question in bulk -->
+    <div wire:ignore.self class="modal fade" id="addBulkQuestionModal" tabindex="-1" aria-labelledby="addBulkQuestionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content p-3">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBulkQuestionModalLabel">Add New Questions in Bulk</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form wire:submit.prevent="uploadCsv" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="csvFile" class="form-label">Select CSV File <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="csvFile" wire:model="csv_file" accept=".csv">
+                            @error('csv_file') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                Ensure the CSV file format is correct. <a href="{{ asset('samples/questions_sample.csv') }}" download>Download sample</a>
+.
+                            </small>
+                        </div>
+
+                        <div class="modal-footer px-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload me-1"></i> Upload Questions
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Bootstrap Modal Listener Script -->
-{{-- <script>
-    // Add Question Modal Events
+<script>
+    // ===== Add Question Modal Events =====
+    addQuestionModal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
     window.addEventListener('openAddQuestionModal', () => {
-        // alert('Opening Add Question Modal');
         try {
-            var modal2 = new bootstrap.Modal(document.getElementById('addQuestionModal'));
-            modal2.show();
+            addQuestionModal.show();
         } catch (error) {
-            console.error('Error opening add modal:', error);
+            console.error('Error opening add question modal:', error);
         }
     });
 
     window.addEventListener('closeAddQuestionModal', () => {
         try {
-            var modal3 = bootstrap.Modal.getInstance(document.getElementById('addQuestionModal'));
-            if (modal3) {
-                modal3.hide();
-            }
+            addQuestionModal.hide();
         } catch (error) {
-            console.error('Error closing add modal:', error);
+            console.error('Error closing add question modal:', error);
         }
     });
-    
-    // Update Question Modal Events
+
+    updateQuestionModal = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
+    // ===== Update Question Modal Events =====
     window.addEventListener('openUpdateQuestionModal', () => {
         try {
-            var modal4 = new bootstrap.Modal(document.getElementById('updateQuestionModal'));
-            modal4.show();
+            updateQuestionModal.show();
         } catch (error) {
-            console.error('Error opening update modal:', error);
+            console.error('Error opening update question modal:', error);
         }
     });
-    
+
     window.addEventListener('closeUpdateQuestionModal', () => {
         try {
-            var modal5 = bootstrap.Modal.getInstance(document.getElementById('updateQuestionModal'));
-            if (modal5) {
-                modal5.hide();
-            }
+            updateQuestionModal.hide();
         } catch (error) {
-            console.error('Error closing update modal:', error);
+            console.error('Error closing update question modal:', error);
         }
     });
-</script> --}}
+
+    bulkAddQuestionModal = new bootstrap.Modal(document.getElementById('addBulkQuestionModal'));
+    // ===== Bulk Add Question Modal Events =====
+    window.addEventListener('openBulkAddQuestionModal', () => {
+        try {
+            bulkAddQuestionModal.show();
+        } catch (error) {
+            console.error('Error opening bulk add modal:', error);
+        }
+    });
+
+    window.addEventListener('closeBulkAddQuestionModal', () => {
+        try {
+            bulkAddQuestionModal.hide();
+        } catch (error) {
+            console.error('Error closing bulk add modal:', error);
+        }
+    });
+</script>

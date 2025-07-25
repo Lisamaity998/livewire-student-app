@@ -1,13 +1,13 @@
 <div>
     @session('success')
-        <div class="alert alert-success" role="alert">
-            {{ $value }}
-        </div>
+    <div class="alert alert-success" role="alert">
+        {{ $value }}
+    </div>
     @endsession
     @session('error')
-        <div class="alert alert-danger" role="alert">
-            {{ $value }}
-        </div>
+    <div class="alert alert-danger" role="alert">
+        {{ $value }}
+    </div>
     @endsession
     <div class="content-header">
         <h1 class="content-title">Class List</h1>
@@ -16,24 +16,24 @@
             <button wire:click="$dispatch('openAddClassModal')" class="btn btn-success">Add New Class</button>
         </div>
     </div>
-
+    
     <div class="student-table">
         <table class="table table-bordered">
             <thead>
-              <tr>
-                <th>#</th>
-                <th>Class Name</th>
-                <th>Topic</th>
-                <th>Teacher</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Interested Student</th>
-                <th>Action</th>
-              </tr>
+                <tr>
+                    <th>#</th>
+                    <th>Class Name</th>
+                    <th>Topic</th>
+                    <th>Teacher</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Interested Student</th>
+                    <th>Action</th>
+                </tr>
             </thead>
             <tbody>
                 @forelse ($classes as $index => $class)
-                     @php
+                    @php
                         $classDateTime = \Carbon\Carbon::parse($class->start_date . ' ' . $class->class_time);
                         $isPast = $classDateTime->isPast();
                     @endphp
@@ -61,14 +61,13 @@
             </tbody>
         </table>
     </div>
-
     <!-- Modal -->
     <div wire:ignore.self class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content p-3">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addClassModalLabel">Add New Class</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="$dispatch('closeAddClassModal')"></button>
                 </div>
                 <div class="modal-body">
                     <livewire:add-new-class />
@@ -77,26 +76,25 @@
         </div>
     </div>
 </div>
-
 <!-- Bootstrap Modal Listener Script -->
-{{-- <script>
+<script>
+    if (typeof addClassModal === 'undefined') {
+        var addClassModal = new bootstrap.Modal(document.getElementById('addClassModal'));
+    }
+    // ===== Add Class Modal Events =====
     window.addEventListener('openAddClassModal', () => {
         try {
-            var modal = new bootstrap.Modal(document.getElementById('addClassModal'));
-            modal.show();
+            addClassModal.show();
         } catch (error) {
-            console.error('Error opening add modal:', error);
+            console.error('Error opening add class modal:', error);
         }
     });
 
     window.addEventListener('closeAddClassModal', () => {
         try {
-            var modal1 = bootstrap.Modal.getInstance(document.getElementById('addClassModal'));
-            if (modal1) {
-                modal1.hide();
-            }
+            addClassModal.hide();
         } catch (error) {
-            console.error('Error closing add modal:', error);
+            console.error('Error closing add class modal:', error);
         }
     });
-</script> --}}
+</script>

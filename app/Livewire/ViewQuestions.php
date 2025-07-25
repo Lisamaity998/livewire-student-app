@@ -8,9 +8,16 @@ use App\Models\Course;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Attributes\On;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ViewQuestions extends Component
 {
+    use WithFileUploads;
+
+    public $csv_file;
+
     public $questions;
 
     protected $listeners = [
@@ -51,6 +58,104 @@ class ViewQuestions extends Component
     public function refreshQuestions()
     {
         $this->questions = Questions::with('course')->get();
+    }
+
+    public function uploadCsv()
+    {
+        $this->validate([
+            'csv_file' => 'required|file|mimes:csv,txt',
+        ]);
+
+        $file = fopen($this->csv_file->getRealPath(), 'r');
+        $header = fgetcsv($file); // skip first row
+
+        $inserted = 0;
+        $skipped = 0;
+
+        // Map course names to IDs
+        $courses = Course::pluck('id', 'name')->mapWithKeys(
+            function($id, $name) {
+                return [strtolower(trim($name)) => $id];
+            }
+        );
+
+        DB::beginTransaction();
+
+        try {
+            while (($row = fgetcsv($file)) !== false) {
+                if (count($row) !== 7) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Extract data
+                $courseName    = isset($row[0]) ? trim($row[0]) : null;
+                $question_name = isset($row[1]) ? trim($row[1]) : null;
+                $a1            = isset($row[2]) ? trim($row[2]) : null;
+                $a2            = isset($row[3]) ? trim($row[3]) : null;
+                $a3            = isset($row[4]) ? trim($row[4]) : null;
+                $a4            = isset($row[5]) ? trim($row[5]) : null;
+                $correct       = isset($row[6]) ? trim($row[6]) : null;
+
+                $courseNameKey = strtolower(trim($courseName));
+                $course_id = $courses[$courseNameKey] ?? null;
+
+                if (!$course_id) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Check for duplicate question in the same course
+                $exists = Questions::where('course_id', $course_id)
+                    ->where('question_name', $question_name)
+                    ->exists();
+
+                if ($exists) {
+                    $skipped++;
+                    continue;
+                }
+
+                $data = [
+                    'course_id' => $course_id,
+                    'question_name' => $question_name,
+                    'answer1' => $a1,
+                    'answer2' => $a2,
+                    'answer3' => $a3,
+                    'answer4' => $a4,
+                    'correct_answer' => $correct,
+                ];
+
+                $validator = Validator::make($data, [
+                    'course_id' => 'required|exists:course,id',
+                    'question_name' => 'required|string|max:255',
+                    'answer1' => 'required|string|max:255',
+                    'answer2' => 'required|string|max:255',
+                    'answer3' => 'required|string|max:255',
+                    'answer4' => 'required|string|max:255',
+                    'correct_answer' => 'required|string|max:255',
+                ]);
+
+                if ($validator->fails()) {
+                    $skipped++;
+                    continue;
+                }
+
+                Questions::create($data);
+                $inserted++;
+            }
+
+            DB::commit();
+            session()->flash('success', "Upload successful! Inserted: $inserted, Skipped: $skipped");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', "Upload failed: " . $e->getMessage());
+        }
+
+        fclose($file);
+        $this->reset('csv_file');
+
+        $this->dispatch('closeBulkAddQuestionModal');
+        $this->fatchQuestions();
     }
 
     public function fatchQuestions()
@@ -127,7 +232,7 @@ class ViewQuestions extends Component
                 $this->dispatch('closeUpdateQuestionModal');
 
                 // Refresh questions list
-                // $this->refreshQuestions();
+                $this->refreshQuestions();
 
                 session()->flash('success', 'Question updated successfully!');
             } else {

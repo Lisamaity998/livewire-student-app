@@ -43,9 +43,9 @@
 
         {{-- Test UI --}}
         @if ($testStarted && !$testSubmitted)
-            <div wire:poll.1s="checkTimerAndSubmitIfExpired">
+            <div>
                 <div class="alert alert-info text-center">
-                    Time Remaining: <strong>{{ gmdate("i:s", $remainingTime) }}</strong>
+                    Time Remaining: <strong id="timer-display">{{ gmdate('i:s', $remainingTime) }}</strong>
                 </div>
 
                 <div class="mt-4">
@@ -127,3 +127,61 @@
         @endif
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let interval;
+        let remaining;
+        let syncCount = 0;
+        let testCancelled = false;
+
+        // Detect when user switches tab or minimizes window
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden && !testCancelled) {
+                testCancelled = true;
+                Livewire.dispatch('cancelTest');
+                clearInterval(interval); // Stop the timer
+            }
+        });
+
+        Livewire.on('startTimer', (initialTime) => {
+            remaining = initialTime;
+            console.log('Timer started with remaining time:', remaining);
+            syncCount = 0;
+            testCancelled = false;
+
+            if (interval) clearInterval(interval);
+
+            interval = setInterval(() => {
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    Livewire.dispatch('autoSubmit');
+                    return;
+                }
+
+                remaining--;
+
+                const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const seconds = String(remaining % 60).padStart(2, '0');
+                const timerDisplay = document.getElementById('timer-display');
+
+                if (timerDisplay) {
+                    timerDisplay.innerText = `${minutes}:${seconds}`;
+                } else {
+                    clearInterval(interval);
+                    return;
+                }
+
+                syncCount++;
+                if (syncCount === 60) {
+                    Livewire.dispatch('syncTime');
+                    syncCount = 0;
+                }
+            }, 1000);
+        });
+
+        Livewire.on('updateRemainingTime', (backendRemaining) => {
+            remaining = backendRemaining;
+        });
+    });
+</script>
