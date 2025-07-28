@@ -11,6 +11,7 @@
     @endsession
     <div class="content-header">
         <h1 class="content-title">Questions List</h1>
+        <input type="text" id="searchQuestion" class="form-control" style="margin-bottom:30px; width:15rem" placeholder="Search questions here" wire:model.live.debounce.400ms="search">
         <!-- Parent Blade View -->
         <div class="d-flex justify-content-between align-items-center">
             <button wire:click="$dispatch('openAddQuestionModal')" class="btn btn-success">Add New Question</button>

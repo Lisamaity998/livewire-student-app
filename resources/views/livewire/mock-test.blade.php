@@ -129,20 +129,20 @@
 </div>
 
 <script>
+    document.addEventListener("livewire:navigated", function () {
+        // re-bind the event listener after navigation if needed
+        registerTimerListeners();
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
+        registerTimerListeners();
+    });
+
+    function registerTimerListeners() {
         let interval;
         let remaining;
         let syncCount = 0;
         let testCancelled = false;
-
-        // Detect when user switches tab or minimizes window
-        document.addEventListener('visibilitychange', function () {
-            if (document.hidden && !testCancelled) {
-                testCancelled = true;
-                Livewire.dispatch('cancelTest');
-                clearInterval(interval); // Stop the timer
-            }
-        });
 
         Livewire.on('startTimer', (initialTime) => {
             remaining = initialTime;
@@ -183,5 +183,13 @@
         Livewire.on('updateRemainingTime', (backendRemaining) => {
             remaining = backendRemaining;
         });
-    });
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden && !testCancelled) {
+                testCancelled = true;
+                Livewire.dispatch('cancelTest');
+                clearInterval(interval);
+            }
+        });
+    }
 </script>

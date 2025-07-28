@@ -16,6 +16,8 @@ class ViewQuestions extends Component
 {
     use WithFileUploads;
 
+    public $search = '';
+
     public $csv_file;
 
     public $questions;
@@ -269,6 +271,23 @@ class ViewQuestions extends Component
     #[Layout('layouts.app')]
     public function render()
     {
+        $searchTerm = '%' . $this->search . '%';
+
+        $this->questions = Questions::with('course')
+            ->where(function ($query) use ($searchTerm) {
+                $query->where('question_name', 'like', $searchTerm)
+                    ->orWhere('answer1', 'like', $searchTerm)
+                    ->orWhere('answer2', 'like', $searchTerm)
+                    ->orWhere('answer3', 'like', $searchTerm)
+                    ->orWhere('answer4', 'like', $searchTerm)
+                    ->orWhere('correct_answer', 'like', $searchTerm)
+                    ->orWhereHas('course', function ($courseQuery) use ($searchTerm) {
+                        $courseQuery->where('name', 'like', $searchTerm);
+                    });
+            })
+            ->latest()
+            ->get();
+
         return view('livewire.view-questions');
     }
 }

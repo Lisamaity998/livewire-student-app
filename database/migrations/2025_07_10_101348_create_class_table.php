@@ -18,6 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('teacher_id');
             $table->date('start_date');
             $table->time('class_time');
+            $table->string('video')->nullable();
+            $table->string('notes')->nullable();
             $table->timestamps();
         });
     }

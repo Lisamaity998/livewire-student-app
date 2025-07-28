@@ -1,6 +1,7 @@
 <div>
     <div class="content-header">
         <h1 class="content-title">Test Result List</h1>
+        <input type="text" id="searchTest" class="form-control" style="margin-bottom:30px; width:15rem" placeholder="Search test result here" wire:model.live.debounce.400ms="search">
     </div>
 
     <div class="student-table">

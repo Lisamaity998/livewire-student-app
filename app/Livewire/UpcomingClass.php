@@ -15,6 +15,7 @@ use Livewire\Attributes\On;
 
 class UpcomingClass extends Component
 {
+    public $search = '';
     public $upcomingClasses = [];
     public $selectedClassId;
 
@@ -36,14 +37,24 @@ class UpcomingClass extends Component
 
             $courseIds = Course::whereIn('name', $studentCourses)->pluck('id');
 
+            $searchTerm = '%' . $this->search . '%';
+
             $this->upcomingClasses = NewClass::with(['teacher', 'course'])
                 ->whereIn('course_id', $courseIds)
                 ->whereDate('start_date', '>', now())
+                ->where(function ($query) use ($searchTerm) {
+                    $query->where('class_name', 'like', $searchTerm)
+                        ->orWhereHas('teacher', function ($teacherQuery) use ($searchTerm) {
+                            $teacherQuery->where('name', 'like', $searchTerm);
+                        });
+                })
                 ->orderBy('start_date')
                 ->get();
         }
+
         return view('livewire.upcoming-class');
     }
+
 
     #[On('setSelectedClass')]
     public function setSelectedClass($classId)
