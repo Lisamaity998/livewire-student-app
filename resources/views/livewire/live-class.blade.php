@@ -31,7 +31,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($upcomingClasses as $class)
+                    {{-- @foreach ($upcomingClasses as $class)
                         <tr>                
                             <td>{{ $class->class_name }}</td>
                             <td>{{ $class->teacher->name ?? 'N/A' }}</td>
@@ -40,7 +40,29 @@
                                 <button class="btn btn-primary" wire:click="$dispatch('openClassModal', { classId: {{ $class->id }} })">View Details</button>
                             </td>
                         </tr>
+                    @endforeach --}}
+
+                    @foreach ($upcomingClasses as $class)
+                        @php
+                            $start = \Carbon\Carbon::parse($class->start_date . ' ' . $class->class_time);
+                            $now = \Carbon\Carbon::now('Asia/Kolkata');
+                            $isBlinking = $now->isSameDay($start) && $now->between($start, $start->copy()->addMinutes(30));
+                        @endphp
+
+                        @if($isBlinking)
+                            <tr wire:poll.120s class="blinking-row">
+                        @else
+                            <tr>
+                        @endif
+                            <td>{{ $class->class_name }}</td>
+                            <td>{{ $class->teacher->name ?? 'N/A' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($class->start_date)->format('d M Y') }}</td>
+                            <td>
+                                <button class="btn btn-primary" wire:click="$dispatch('openClassModal', { classId: {{ $class->id }} })">View Details</button>
+                            </td>
+                        </tr>
                     @endforeach
+
                 </tbody>
             </table>
         @else
@@ -49,7 +71,7 @@
     </div>
 
     <!-- Modal -->
-    <div wire:ignore.self class="modal fade" id="classModal" tabindex="-1" aria-labelledby="classModalLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="liveClassModal" tabindex="-1" aria-labelledby="classModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -74,22 +96,21 @@
     </div>
 </div>
 
+
 <script>
-    document.addEventListener('livewire:init', () => {
+    liveClassModal = new bootstrap.Modal(document.getElementById('liveClassModal'));
+    document.addEventListener('livewire:navigated', () => {
         Livewire.on('openClassModal', ({ classId }) => {
             // Just dispatch the setSelectedClass event
             Livewire.dispatch('setSelectedClass', { classId });
             
             // Show modal after a brief delay
             setTimeout(() => {
-                const modal = new bootstrap.Modal(document.getElementById('classModal'));
-                modal.show();
-            }, 100);
+                liveClassModal.show();
+            }, 150);
         });
-    });
-
-    window.addEventListener('closeClassModal', () => {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('classModal'));
-        modal.hide();
+        window.addEventListener('closeClassModal', () => {
+            liveClassModal.hide();
+        });
     });
 </script>

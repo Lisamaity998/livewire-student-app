@@ -104,3 +104,32 @@ body {
     overflow-x: auto;
     width: 100%;
 }
+
+.submenu a {
+    padding: 12px 30px;
+    display: block;
+    color: #adb5bd;
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+
+
+.submenu a:hover {
+    background-color: #495057;
+    color: white;
+}
+
+.submenu a.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.blinking-row {
+    animation: blink-red 1s infinite;
+}
+
+@keyframes blink-red {
+    0%   { background-color: #ffffff; }
+    50%  { background-color: #f8d7da; }
+    100% { background-color: #ffffff; }
+}

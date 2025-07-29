@@ -20,6 +20,7 @@ return new class extends Migration
             $table->time('class_time');
             $table->string('video')->nullable();
             $table->string('notes')->nullable();
+            $table->string('youtube_url')->nullable();
             $table->timestamps();
         });
     }

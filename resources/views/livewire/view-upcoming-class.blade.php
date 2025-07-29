@@ -48,12 +48,18 @@
                         <td>{{ $class->interestedStudents->count() }}</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <a href="#" class="text-success me-2" style="cursor: pointer" wire:click.prevent="editClass({{ $class->id }})">
-                                    <i class="fas fa-edit"></i>
-                                </a>
                                 <a href="#" class="text-danger me-2" style="cursor: pointer" wire:click.prevent="deleteClass({{ $class->id }})">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
+                                @php
+                                    $classDateTime = \Carbon\Carbon::parse($class->start_date . ' ' . $class->class_time);
+                                @endphp
+
+                                @if (!$classDateTime->isPast())
+                                    <a href="#" class="text-success me-2" style="cursor: pointer" wire:click.prevent="editClass({{ $class->id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -127,7 +133,7 @@
                             @if(!empty($teachers))
                                 <div class="form-group mb-3">
                                     <label for="teacherSelect">Select a Teacher</label>
-                                    <select id="teacherSelect" class="form-select" wire:model.lazy="teacher_id">
+                                    <select id="teacherSelect" class="form-select teacherSelect" wire:model="teacher_id">
                                         <option value="">-- Choose a teacher --</option>
                                         @forelse($teachers as $teacher)
                                             <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
@@ -146,7 +152,7 @@
                             {{-- Optional File Uploads --}}
                             <div class="form-group mb-3">
                                 <label for="videoUpload">Upload Video (Optional)</label>
-                                <input type="file" id="videoUpload" class="form-control" wire:model="video">
+                                <input type="file" id="videoUpload" class="form-control" wire:model.lazy="video" accept="video/*">
                                 @error('video')
                                     <p class="text-danger">{{ $message }}</p>
                                 @enderror
@@ -154,8 +160,16 @@
 
                             <div class="form-group mb-3">
                                 <label for="notesUpload">Upload Notes (Optional)</label>
-                                <input type="file" id="notesUpload" class="form-control" wire:model="notes">
+                                <input type="file" id="notesUpload" class="form-control" wire:model.lazy="notes" accept=".pdf">
                                 @error('notes')
+                                    <p class="text-danger">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="youtubeUrl">YouTube Video URL (Optional):</label>
+                                <input type="text" id="youtubeUrl" wire:model.lazy="youtubeUrl" class="form-control" placeholder="Enter YouTube video URL">
+                                @error('youtubeUrl')
                                     <p class="text-danger">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -172,8 +186,8 @@
 </div>
 <!-- Bootstrap Modal Listener Script -->
 <script>
-    addClassModal = new bootstrap.Modal(document.getElementById('addClassModal'));
     // ===== Add Class Modal Events =====
+    addClassModal = new bootstrap.Modal(document.getElementById('addClassModal'));
     window.addEventListener('openAddClassModal', () => {
         try {
             addClassModal.show();
@@ -191,19 +205,30 @@
     });
 
     // ===== Edit Class Modal Events =====
-    editClassModal = new bootstrap.Modal(document.getElementById('editClassModal'));
-    window.addEventListener('openEditClassModal', () => {
-        try {
-            editClassModal.show();
-        } catch (error) {
-            console.error('Error opening edit class modal:', error);
-        }
-    }); 
-    window.addEventListener('closeEditClassModal', () => {
-        try {
-            editClassModal.hide();
-        } catch (error) {
-            console.error('Error closing edit class modal:', error);
-        }
+    $(document).ready(function(){
+        editClassModal = new bootstrap.Modal(document.getElementById('editClassModal'));
+        window.addEventListener('openEditClassModal', (event) => {
+            try {
+                const teacherId = event.detail.teacherId || null;
+                setTimeout(() => {
+                    const select = document.getElementById('teacherSelect');
+                    if (select) {
+                        select.value = teacherId;
+                    } else {
+                        console.warn("Dropdown not yet available");
+                    }
+                }, 100); // slight delay to allow DOM update
+                editClassModal.show();
+            } catch (error) {
+                console.error('Error opening edit class modal:', error);
+            }
+        }); 
+        window.addEventListener('closeEditClassModal', () => {
+            try {
+                editClassModal.hide();
+            } catch (error) {
+                console.error('Error closing edit class modal:', error);
+            }
+        });
     });
 </script>

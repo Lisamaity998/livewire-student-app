@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use App\Models\NewClass;
 use App\Models\Course;
 use App\Models\Teacher;
+use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 
 class ViewUpcomingClass extends Component
@@ -20,12 +21,24 @@ class ViewUpcomingClass extends Component
     public $selectedClassId;
     public $class_name;
     public $course_id;
+
+    #[Validate('required|date|after_or_equal:today')]
     public $selected_date;
+
+    #[Validate('required|date_format:H:i')]
     public $class_time;
+
+    #[Validate('required|exists:teacher,id')]
     public $teacher_id;
 
+    #[Validate('nullable|file|mimes:mp4,avi|max:20480')]
     public $video;
+
+    #[Validate('nullable|file|mimes:pdf,doc,docx,txt|max:10240')]
     public $notes;
+
+    #[Validate('nullable|url|starts_with:https://youtu.be')]
+    public $youtubeUrl;
 
     public $courses = [];
     public $teachers = [];
@@ -59,7 +72,7 @@ class ViewUpcomingClass extends Component
     }
 
     public function editClass($classId)
-    {
+    {   
         $class = NewClass::with('course', 'teacher')->find($classId);
 
         if (!$class) {
@@ -67,28 +80,42 @@ class ViewUpcomingClass extends Component
             return;
         }
 
+        // Clear everything first
+        $this->reset(['selectedClassId', 'class_name', 'course_id', 'selected_date', 'class_time', 'teacher_id', 'video', 'notes', 'youtubeUrl']);
+        $this->teachers = [];
+
         $this->selectedClassId = $class->id;
         $this->class_name = $class->class_name;
         $this->course_id = $class->course_id;
         $this->selected_date = $class->start_date;
-        $this->class_time = $class->class_time;
-        $this->teacher_id = $class->teacher_id;
-
+        $this->class_time = date('H:i', strtotime($class->class_time));
+        
         // Load teachers for the course
         $this->teachers = Teacher::where('skills', 'LIKE', "%{$class->course->name}%")->get();
+        $this->teacher_id = $class->teacher_id;
 
-        $this->dispatch('openEditClassModal');
+        $this->dispatch('openEditClassModal', teacherId: $this->teacher_id);
+    }
+
+    public function updatedVideo()
+    {
+        if ($this->video && $this->video->getSize() > 20971520) { 
+            session()->flash('error', 'Video File too large. Maximum size is 20MB.');
+            $this->video = null;
+        }
+    }
+
+    public function updatedNotes()
+    {
+        if ($this->notes && $this->notes->getSize() > 10485760) {
+            session()->flash('error', 'Notes File too large. Maximum size is 10MB.');
+            $this->notes = null;
+        }
     }
 
     public function updateClass()
     {
-        $this->validate([
-            'selected_date' => 'required|date|after_or_equal:today',
-            'class_time' => 'required|date_format:H:i',
-            'teacher_id' => 'required|exists:teacher,id',
-            'video' => 'nullable|file|mimes:mp4,avi,mov|max:20480',
-            'notes' => 'nullable|file|mimes:pdf,doc,docx,txt|max:10240',
-        ]);
+        $this->validate();
 
         $class = NewClass::find($this->selectedClassId);
 
@@ -104,17 +131,22 @@ class ViewUpcomingClass extends Component
         // Optional file updates
         if ($this->video) {
             $class->video = $this->video->store('class_videos', 'public');
+            $this->video = null; // Reset after storing
         }
 
         if ($this->notes) {
             $class->notes = $this->notes->store('class_notes', 'public');
+            $this->notes = null; // Reset after storing
         }
+
+        $class->youtube_url = $this->youtubeUrl;
 
         $class->save();
 
         session()->flash('success', 'Class updated successfully!');
         $this->dispatch('closeEditClassModal');
         $this->refreshUpcomingClasses();
+        $this->reset(['selectedClassId', 'class_name', 'course_id', 'selected_date', 'class_time', 'teacher_id', 'video', 'notes', 'youtubeUrl']);
     }
 
     #[Layout('layouts.app')]
@@ -131,10 +163,8 @@ class ViewUpcomingClass extends Component
                     ->orWhereHas('teacher', function ($teacherQuery) use ($searchTerm) {
                         $teacherQuery->where('name', 'like', $searchTerm);
                     });
-                    // ->orWhereDate('start_date', 'like', $searchTerm)
-                    // ->orWhere('class_time', 'like', $searchTerm);
             })
-            ->latest()
+            ->orderBy('start_date', 'desc')
             ->get();
 
         return view('livewire.view-upcoming-class', compact('classes'));

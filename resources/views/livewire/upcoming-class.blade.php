@@ -50,7 +50,7 @@
     </div>
 
     <!-- Bootstrap Modal -->
-    <div wire:ignore.self class="modal fade" id="classModal" tabindex="-1" aria-labelledby="classModalLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="upcomingClassModal" tabindex="-1" aria-labelledby="classModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -75,21 +75,20 @@
     </div>
 </div>
 <script>
-    document.addEventListener('livewire:init', () => {
+    upcomingClassModal = new bootstrap.Modal(document.getElementById('upcomingClassModal'));
+    document.addEventListener('livewire:navigated', () => {
         Livewire.on('openClassModal', ({ classId }) => {
             // Just dispatch the setSelectedClass event
             Livewire.dispatch('setSelectedClass', { classId });
             
             // Show modal after a brief delay
             setTimeout(() => {
-                const modal = new bootstrap.Modal(document.getElementById('classModal'));
-                modal.show();
-            }, 100);
+                upcomingClassModal.show();
+            }, 150);
+        });
+        window.addEventListener('closeClassModal', () => {
+            upcomingClassModal.hide();
         });
     });
 
-    window.addEventListener('closeClassModal', () => {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('classModal'));
-        modal.hide();
-    });
 </script>
