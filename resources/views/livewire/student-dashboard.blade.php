@@ -1,4 +1,14 @@
 <div>
+    @session('error')
+        <div class="alert alert-danger" role="alert">
+            {{ $value }}
+        </div>
+    @endsession
+    @session('warning')
+        <div class="alert alert-warning" role="alert">
+            {{ $value }}
+        </div>
+    @endsession
     <div class="content-header">
         <h1 class="content-title">Dashboard</h1>
     </div>

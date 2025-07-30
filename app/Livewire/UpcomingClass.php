@@ -5,7 +5,6 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Course;
-use App\Models\Teacher;
 use App\Models\StudentInformation;
 use App\Models\NewClass;
 use App\Models\ClassAttendance;
@@ -49,6 +48,7 @@ class UpcomingClass extends Component
                         });
                 })
                 ->orderBy('start_date')
+                ->orderBy('class_time')
                 ->get();
         }
 
@@ -68,7 +68,7 @@ class UpcomingClass extends Component
                 'topic' => $class->course->name ?? 'N/A',
                 'teacher' => $class->teacher->name ?? 'N/A',
                 'date' => Carbon::parse($class->start_date)->format('d M Y'),
-                'time' => Carbon::parse($class->class_time)->format('H:i')
+                'time' => Carbon::parse($class->class_time)->format('h:i A')
             ];
         }
     }

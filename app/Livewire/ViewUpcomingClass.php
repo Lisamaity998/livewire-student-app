@@ -34,7 +34,7 @@ class ViewUpcomingClass extends Component
     #[Validate('nullable|file|mimes:mp4,avi|max:20480')]
     public $video;
 
-    #[Validate('nullable|file|mimes:pdf,doc,docx,txt|max:10240')]
+    #[Validate('nullable|file|mimes:pdf|max:10240')]
     public $notes;
 
     #[Validate('nullable|url|starts_with:https://youtu.be')]
@@ -64,7 +64,7 @@ class ViewUpcomingClass extends Component
         $class = NewClass::find($classId);
         if ($class) {
             $class->delete();
-            // $this->refreshUpcomingClasses();
+            $this->refreshUpcomingClasses();
             session()->flash('success', 'Class deleted successfully!');
         } else {
             session()->flash('error', 'Class not found.');
@@ -97,25 +97,19 @@ class ViewUpcomingClass extends Component
         $this->dispatch('openEditClassModal', teacherId: $this->teacher_id);
     }
 
-    public function updatedVideo()
-    {
-        if ($this->video && $this->video->getSize() > 20971520) { 
-            session()->flash('error', 'Video File too large. Maximum size is 20MB.');
-            $this->video = null;
-        }
-    }
-
-    public function updatedNotes()
-    {
-        if ($this->notes && $this->notes->getSize() > 10485760) {
-            session()->flash('error', 'Notes File too large. Maximum size is 10MB.');
-            $this->notes = null;
-        }
-    }
-
     public function updateClass()
     {
         $this->validate();
+
+        // if ($this->video && $this->video->getSize() > 20480) { 
+        //     session()->flash('error', 'Video File too large. Maximum size is 20MB.');
+        //     return;
+        // }
+
+        // if ($this->notes && $this->notes->getSize() > 10240) {
+        //     session()->flash('error', 'Notes File too large. Maximum size is 10MB.');
+        //     return;
+        // }
 
         $class = NewClass::find($this->selectedClassId);
 
@@ -136,10 +130,13 @@ class ViewUpcomingClass extends Component
 
         if ($this->notes) {
             $class->notes = $this->notes->store('class_notes', 'public');
-            $this->notes = null; // Reset after storing
+            $this->notes = null;
         }
 
-        $class->youtube_url = $this->youtubeUrl;
+        if($this->youtubeUrl){
+            $class->youtube_url = $this->youtubeUrl;
+            $this->youtubeUrl = null;
+        }
 
         $class->save();
 
@@ -165,6 +162,7 @@ class ViewUpcomingClass extends Component
                     });
             })
             ->orderBy('start_date', 'desc')
+            ->orderBy('class_time', 'desc')
             ->get();
 
         return view('livewire.view-upcoming-class', compact('classes'));

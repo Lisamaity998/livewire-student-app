@@ -28,7 +28,7 @@
                         <th>Class Name</th>
                         <th>Teacher</th>
                         <th>Date</th>
-                        <th>Action</th>
+                        <th class="w-25">Action</th>
                     </tr>
                 </thead>
                 <tbody>

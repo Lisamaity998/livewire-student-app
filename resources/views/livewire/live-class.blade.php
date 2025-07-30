@@ -27,42 +27,24 @@
                         <th>Class Name</th>
                         <th>Teacher</th>
                         <th>Date</th>
-                        <th>Action</th>
+                        <th class="w-25">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- @foreach ($upcomingClasses as $class)
+                    @foreach ($upcomingClasses as $class)
                         <tr>                
                             <td>{{ $class->class_name }}</td>
                             <td>{{ $class->teacher->name ?? 'N/A' }}</td>
                             <td>{{ \Carbon\Carbon::parse($class->start_date)->format('d M Y') }}</td>
                             <td>
                                 <button class="btn btn-primary" wire:click="$dispatch('openClassModal', { classId: {{ $class->id }} })">View Details</button>
-                            </td>
-                        </tr>
-                    @endforeach --}}
 
-                    @foreach ($upcomingClasses as $class)
-                        @php
-                            $start = \Carbon\Carbon::parse($class->start_date . ' ' . $class->class_time);
-                            $now = \Carbon\Carbon::now('Asia/Kolkata');
-                            $isBlinking = $now->isSameDay($start) && $now->between($start, $start->copy()->addMinutes(30));
-                        @endphp
-
-                        @if($isBlinking)
-                            <tr wire:poll.120s class="blinking-row">
-                        @else
-                            <tr>
-                        @endif
-                            <td>{{ $class->class_name }}</td>
-                            <td>{{ $class->teacher->name ?? 'N/A' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($class->start_date)->format('d M Y') }}</td>
-                            <td>
-                                <button class="btn btn-primary" wire:click="$dispatch('openClassModal', { classId: {{ $class->id }} })">View Details</button>
+                                @if ($this->hasMarkedAttendance($class->id))
+                                    <button class="btn btn-success" wire:click="joinClass({{ $class->id }})">Join Class</button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
-
                 </tbody>
             </table>
         @else
