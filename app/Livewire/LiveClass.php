@@ -22,7 +22,8 @@ class LiveClass extends Component
         'topic' => '',
         'teacher' => '',
         'date' => '',
-        'time' => ''
+        'time' => '',
+        'showAttendanceButtons' => false,
     ];
 
     #[Layout('layouts.student-app')]
@@ -82,12 +83,19 @@ class LiveClass extends Component
         // Find the class and set modal data
         $class = collect($this->upcomingClasses)->firstWhere('id', $classId);
         if ($class) {
+            $startTime = Carbon::parse($class->start_date . ' ' . $class->class_time);
+            $now = Carbon::now();
+
+            // Only show buttons if class starts in more than 30 minutes
+            $showAttendanceButtons = $now->lt($startTime->subMinutes(30));
+
             $this->modalData = [
                 'className' => $class->class_name,
                 'topic' => $class->course->name ?? 'N/A',
                 'teacher' => $class->teacher->name ?? 'N/A',
                 'date' => Carbon::parse($class->start_date)->format('d M Y'),
-                'time' => Carbon::parse($class->class_time)->format('h:i A')
+                'time' => Carbon::parse($class->class_time)->format('h:i A'),
+                'showAttendanceButtons' => $showAttendanceButtons
             ];
         }
     }

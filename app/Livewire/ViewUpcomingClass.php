@@ -31,7 +31,7 @@ class ViewUpcomingClass extends Component
     #[Validate('required|exists:teacher,id')]
     public $teacher_id;
 
-    #[Validate('nullable|file|mimes:mp4,avi|max:20480')]
+    #[Validate('required|file|mimes:mp4,avi|max:20480')]
     public $video;
 
     #[Validate('nullable|file|mimes:pdf|max:10240')]
@@ -51,6 +51,12 @@ class ViewUpcomingClass extends Component
     {
         $this->refreshUpcomingClasses();
         $this->courses = Course::all();
+        // dd(phpinfo());
+        // dd([
+        //     'post_max_size' => ini_get('post_max_size'),
+        //     'upload_max_filesize' => ini_get('upload_max_filesize'),
+        //     'max_file_uploads' => ini_get('max_file_uploads'),
+        // ]);
     }
 
     public function refreshUpcomingClasses()
@@ -97,53 +103,65 @@ class ViewUpcomingClass extends Component
         $this->dispatch('openEditClassModal', teacherId: $this->teacher_id);
     }
 
+    public function updatedvideo(){
+        $this->validateOnly('video');
+
+    }
+
     public function updateClass()
     {
-        $this->validate();
+        // dd($this->video);
+        try{
 
-        // if ($this->video && $this->video->getSize() > 20480) { 
-        //     session()->flash('error', 'Video File too large. Maximum size is 20MB.');
-        //     return;
-        // }
-
-        // if ($this->notes && $this->notes->getSize() > 10240) {
-        //     session()->flash('error', 'Notes File too large. Maximum size is 10MB.');
-        //     return;
-        // }
-
-        $class = NewClass::find($this->selectedClassId);
-
-        if (!$class) {
-            session()->flash('error', 'Class not found.');
-            return;
+            $this->validate();
+    
+            // if ($this->video && $this->video->getSize() > 20480) { 
+            //     session()->flash('error', 'Video File too large. Maximum size is 20MB.');
+            //     return;
+            // }
+    
+            // if ($this->notes && $this->notes->getSize() > 10240) {
+            //     session()->flash('error', 'Notes File too large. Maximum size is 10MB.');
+            //     return;
+            // }
+    
+            $class = NewClass::find($this->selectedClassId);
+    
+            if (!$class) {
+                session()->flash('error', 'Class not found.');
+                return;
+            }
+    
+            $class->start_date = $this->selected_date;
+            $class->class_time = $this->class_time;
+            $class->teacher_id = $this->teacher_id;
+    
+            // Optional file updates
+            if ($this->video) {
+                $class->video = $this->video->store('class_videos', 'public');
+                $this->video = null; // Reset after storing
+            }
+    
+            if ($this->notes) {
+                $class->notes = $this->notes->store('class_notes', 'public');
+                $this->notes = null;
+            }
+    
+            if($this->youtubeUrl){
+                $class->youtube_url = $this->youtubeUrl;
+                $this->youtubeUrl = null;
+            }
+    
+            $class->save();
+    
+            session()->flash('success', 'Class updated successfully!');
+            $this->dispatch('closeEditClassModal');
+            $this->refreshUpcomingClasses();
+            $this->reset(['selectedClassId', 'class_name', 'course_id', 'selected_date', 'class_time', 'teacher_id', 'video', 'notes', 'youtubeUrl']);
+        }catch (\Illuminate\Validation\ValidationException $e) {
+            session()->flash('error', 'Failed to update class: ' . $e->getMessage());
+            throw $e; // Re-throw to show validation errors in the UI
         }
-
-        $class->start_date = $this->selected_date;
-        $class->class_time = $this->class_time;
-        $class->teacher_id = $this->teacher_id;
-
-        // Optional file updates
-        if ($this->video) {
-            $class->video = $this->video->store('class_videos', 'public');
-            $this->video = null; // Reset after storing
-        }
-
-        if ($this->notes) {
-            $class->notes = $this->notes->store('class_notes', 'public');
-            $this->notes = null;
-        }
-
-        if($this->youtubeUrl){
-            $class->youtube_url = $this->youtubeUrl;
-            $this->youtubeUrl = null;
-        }
-
-        $class->save();
-
-        session()->flash('success', 'Class updated successfully!');
-        $this->dispatch('closeEditClassModal');
-        $this->refreshUpcomingClasses();
-        $this->reset(['selectedClassId', 'class_name', 'course_id', 'selected_date', 'class_time', 'teacher_id', 'video', 'notes', 'youtubeUrl']);
     }
 
     #[Layout('layouts.app')]

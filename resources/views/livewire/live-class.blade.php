@@ -65,13 +65,15 @@
                     <p><strong>Topic:</strong> <span>{{ $modalData['topic'] }}</span></p>
                     <p><strong>Teacher:</strong> <span>{{ $modalData['teacher'] }}</span></p>
                     <p><strong>Date:</strong> <span>{{ $modalData['date'] }}</span></p>
-                    <p><strong>Time:</strong> <span>{{ $modalData['time'] }}</span></p>
-                    <p><strong style="margin-right:15px">Are Going To Attend: </strong>
-                        <span style="display: inline-flex; gap: 25px;" class="ml-3">
-                        <a style="cursor: pointer;" wire:click='attendClass'><i class="fa-solid fa-check text-success"></i></a>
-                        <a style="cursor: pointer;" wire:click='missClass'><i class="fa-solid fa-x text-danger"></i></a>
-                        </span>
-                    </p>              
+                    <p><strong>Time:</strong> <span>{{ $modalData['time'] }}</span></p>    
+                    @if($modalData['showAttendanceButtons'])
+                        <p><strong style="margin-right:15px">Are Going To Attend: </strong>
+                            <span style="display: inline-flex; gap: 25px;" class="ml-3">
+                            <a style="cursor: pointer;" wire:click='attendClass'><i class="fa-solid fa-check text-success"></i></a>
+                            <a style="cursor: pointer;" wire:click='missClass'><i class="fa-solid fa-x text-danger"></i></a>
+                            </span>
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>

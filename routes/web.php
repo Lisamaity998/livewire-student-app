@@ -13,6 +13,7 @@ use App\Livewire\TestResults;
 use App\Livewire\StudentsTestResults;
 use App\Livewire\PreviousClass;
 use App\Livewire\ClassView;
+use App\Livewire\TeacherDashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +65,19 @@ Route::get('/logout', function () {
     auth()->guard('admin')->logout();
     return redirect()->route('admin.login');
 })->name('admin.logout');
+
+Route::get('/teacher_login', function () {
+    return view('teacherLogin');
+})->name('teacher.login');
+
+Route::middleware(['auth:teacher'])->group(function () {
+    Route::get('teacher/dashboard', TeacherDashboard::class)->name('teacher.dashboard');
+});
+
+Route::get('/teacherLogout', function () {
+    auth()->guard('teacher')->logout();
+    return redirect()->route('teacher.login');
+})->name('teacher.logout');
 
 Route::get('/to_do_list', function () {
     return view('toDoList');

@@ -3,6 +3,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
+/* ==side bar== */
 .sidebar {
     height: 100vh;
     width: 280px;
@@ -77,6 +78,68 @@ body {
     padding: 10px 20px;
 }
 
+.submenu a {
+    padding: 12px 30px;
+    display: block;
+    color: #adb5bd;
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+
+.submenu a:hover {
+    background-color: #495057;
+    color: white;
+}
+
+.submenu a.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* ==top bar== */
+.top-navbar {
+    position: fixed;
+    top: 0;
+    margin-left: 280px;
+    right: 0;
+    height: 60px;
+    background-color: white;
+    z-index: 999;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.notification-wrapper {
+    position: relative;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    width: 250px;
+    display: none; /* Initially hidden */
+    z-index: 1001;
+}
+
+.notification-item {
+    font-size: 0.9rem;
+    padding: 5px 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* ==main content== */
 .main-content {
     margin-left: 280px;
     padding: 30px;
@@ -98,38 +161,9 @@ body {
 .student-table {
     background-color: white;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     padding: 20px;
     overflow-x: auto;
     width: 100%;
-}
-
-.submenu a {
-    padding: 12px 30px;
-    display: block;
-    color: #adb5bd;
-    font-size: 0.95rem;
-    text-decoration: none;
-}
-
-
-.submenu a:hover {
-    background-color: #495057;
-    color: white;
-}
-
-.submenu a.active {
-    background-color: #007bff;
-    color: white;
-}
-
-.blinking-row {
-    animation: blink-red 1s infinite;
-}
-
-@keyframes blink-red {
-    0%   { background-color: #ffffff; }
-    50%  { background-color: #f8d7da; }
-    100% { background-color: #ffffff; }
 }

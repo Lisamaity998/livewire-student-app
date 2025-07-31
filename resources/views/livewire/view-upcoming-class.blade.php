@@ -152,7 +152,7 @@
                             {{-- Optional File Uploads --}}
                             <div class="form-group mb-3">
                                 <label for="videoUpload">Upload Video (Optional)</label>
-                                <input type="file" id="videoUpload" class="form-control" wire:model.lazy="video" accept="video/*">
+                                <input type="file" id="videoUpload" class="form-control" wire:model="video" accept="video/*">
                                 @error('video')
                                     <p class="text-danger">{{ $message }}</p>
                                 @enderror
@@ -160,7 +160,7 @@
 
                             <div class="form-group mb-3">
                                 <label for="notesUpload">Upload Notes (Optional)</label>
-                                <input type="file" id="notesUpload" class="form-control" wire:model.lazy="notes" accept=".pdf">
+                                <input type="file" id="notesUpload" class="form-control" wire:model="notes" accept=".pdf">
                                 @error('notes')
                                     <p class="text-danger">{{ $message }}</p>
                                 @enderror

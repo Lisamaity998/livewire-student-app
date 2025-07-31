@@ -52,6 +52,30 @@
         </div>
     </div>
 
+    <!-- Top Navbar -->
+    {{-- <div class="top-navbar d-flex justify-content-between align-items-center px-4 shadow-sm">
+        <span class="fw-bold">Welcome, {{ Auth::user()->name }}</span>
+        <i class="bi bi-bell-fill fs-5"></i>
+    </div> --}}
+
+    <div class="top-navbar d-flex justify-content-between align-items-center px-4 shadow-sm position-relative">
+        <span class="fw-bold">Welcome, {{ Auth::user()->name }}</span>
+        
+        <div class="notification-wrapper position-relative">
+            <i class="bi bi-bell-fill fs-5 cursor-pointer" id="notificationToggle"></i>
+
+            <!-- Notification Dropdown -->
+            <div class="notification-dropdown shadow" id="notificationDropdown">
+                <p class="mb-1 fw-bold">Notifications</p>
+                <hr class="mt-0 mb-2">
+                <div class="notification-item">📢 New class added: Laravel Basics</div>
+                <div class="notification-item">📅 Upcoming test on Sunday</div>
+                <div class="notification-item">✅ Your assignment is approved</div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Main Content -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>  
     <div class="main-content">
@@ -59,5 +83,23 @@
     </div>
     
     @livewireScripts
+
+    <script>
+    // document.addEventListener('DOMContentLoaded', function () {
+        const bellIcon = document.getElementById('notificationToggle');
+        const dropdown = document.getElementById('notificationDropdown');
+
+        bellIcon.addEventListener('click', function () {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Optional: Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!bellIcon.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    // });
+    </script>
 </body>
 </html>
