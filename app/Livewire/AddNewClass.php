@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Teacher;
 use App\Models\NewClass;
 use App\Models\StudentInformation;
+use App\Notifications\ClassCreatedNotification;
 
 class AddNewClass extends Component
 {
@@ -65,7 +66,11 @@ class AddNewClass extends Component
                 $users = StudentInformation::where('status', 'approved')->where('course', 'LIKE', "%{$course->name}%")->get();
                 foreach ($users as $user) {
                     try {
+                        // Your existing email logic
                         sendEmail($user, $className, $teacher->name, $selectedDate);
+
+                        // New: Send notification to the student
+                        $user->notify(new ClassCreatedNotification($newClassCreated));
                     } catch (\Exception $e) {
                         session()->flash('error', 'Failed to send email: ' . $e->getMessage());
                     }

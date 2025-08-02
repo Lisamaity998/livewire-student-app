@@ -31,7 +31,7 @@ class ViewUpcomingClass extends Component
     #[Validate('required|exists:teacher,id')]
     public $teacher_id;
 
-    #[Validate('required|file|mimes:mp4,avi|max:20480')]
+    #[Validate('nullable|file|mimes:mp4,avi|max:20480')]
     public $video;
 
     #[Validate('nullable|file|mimes:pdf|max:10240')]

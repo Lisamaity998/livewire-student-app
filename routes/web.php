@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotificationClassCreated;
 use App\Livewire\Approval;
 use App\Livewire\StudentList;
 use App\Livewire\StudentDashboard;
@@ -42,6 +43,8 @@ Route::middleware(['auth:student'])->group(function () {
     Route::get('student/test_results', TestResults::class)->name('test.results');
     Route::get('student/previous_class', PreviousClass::class)->name('previous.class');
     Route::get('student/class_view/{id}', ClassView::class)->name('class.view');
+    
+    Route::get('/markasred/{id}', [NotificationClassCreated::class, 'markasread'])->name('markasred');
 });
 
 Route::get('/studentLogout', function () {

@@ -52,15 +52,13 @@
         </div>
     </div>
 
-    <!-- Top Navbar -->
-    {{-- <div class="top-navbar d-flex justify-content-between align-items-center px-4 shadow-sm">
-        <span class="fw-bold">Welcome, {{ Auth::user()->name }}</span>
-        <i class="bi bi-bell-fill fs-5"></i>
-    </div> --}}
+    @php
+        $notifications = Auth::user()->unreadNotifications;
+    @endphp
 
     <div class="top-navbar d-flex justify-content-between align-items-center px-4 shadow-sm position-relative">
         <span class="fw-bold">Welcome, {{ Auth::user()->name }}</span>
-        
+
         <div class="notification-wrapper position-relative">
             <i class="bi bi-bell-fill fs-5 cursor-pointer" id="notificationToggle"></i>
 
@@ -68,9 +66,14 @@
             <div class="notification-dropdown shadow" id="notificationDropdown">
                 <p class="mb-1 fw-bold">Notifications</p>
                 <hr class="mt-0 mb-2">
-                <div class="notification-item">📢 New class added: Laravel Basics</div>
-                <div class="notification-item">📅 Upcoming test on Sunday</div>
-                <div class="notification-item">✅ Your assignment is approved</div>
+
+                @forelse ($notifications as $note)
+                    <div class="notification-item">
+                        📢 {{ $note->data['message'] }} <a href="{{ route('markasred', $note->id) }}"><i class="fa-solid fa-x text-danger"></i></a>
+                    </div>
+                @empty
+                    <div class="notification-item">No new notifications.</div>
+                @endforelse
             </div>
         </div>
     </div>
@@ -84,22 +87,47 @@
     
     @livewireScripts
 
-    <script>
-    // document.addEventListener('DOMContentLoaded', function () {
-        const bellIcon = document.getElementById('notificationToggle');
-        const dropdown = document.getElementById('notificationDropdown');
+    <script type="text/javascript">
+        // Function to initialize DOM elements
+        function initializeDOM() {
+            console.log('DOM initialized');
+            // Handle notification toggle
+            const bellIcon = document.getElementById('notificationToggle');
+            const dropdown = document.getElementById('notificationDropdown');
 
-        bellIcon.addEventListener('click', function () {
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Optional: Close dropdown when clicking outside
-        document.addEventListener('click', function (event) {
-            if (!bellIcon.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.style.display = 'none';
+            console.log('Bell icon:', bellIcon);
+            console.log('Dropdown:', dropdown);
+            if (bellIcon && dropdown) {
+                console.log('Elements not found!');
+                // Remove existing listeners to avoid duplicates
+                bellIcon.replaceWith(bellIcon.cloneNode(true));
+                const newBellIcon = document.getElementById('notificationToggle');
+                newBellIcon.addEventListener('click', function () {
+                    setTimeout(() => {
+                        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                    }, 100);
+                });
+ 
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function (event) {
+                    console.log('Clicked outside:', event.target);
+                    if (!newBellIcon.contains(event.target) && !dropdown.contains(event.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
             }
+        }
+ 
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeDOM);
+ 
+        // Re-initialize on Livewire navigation
+        document.addEventListener('livewire:navigated', function() {
+            setTimeout(initializeDOM, 100);
         });
-    // });
+ 
+        // Also handle Livewire content updates
+        document.addEventListener('livewire:load', initializeDOM);
     </script>
 </body>
 </html>

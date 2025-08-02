@@ -11,12 +11,14 @@ class ClassCreatedNotification extends Notification
 {
     use Queueable;
 
+    protected $class;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($class)
     {
-        //
+        $this->class = $class;
     }
 
     /**
@@ -26,29 +28,14 @@ class ClassCreatedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
-    }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
+    public function toArray($notifiable)
     {
         return [
-            //
+            'title' => 'New Class Scheduled',
+            'message' => "A '{$this->class->class_name}' is scheduled for {$this->class->start_date} at {$this->class->class_time}, tought by {$this->class->teacher->name}.",
         ];
     }
 }
