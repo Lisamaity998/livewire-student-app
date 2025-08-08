@@ -39,6 +39,8 @@ class StudentLogin extends Component
                 }
                 if ($student->status === 'approved') {
                     auth()->guard('student')->login($student);
+                    $authUser = auth()->guard('student')->id();
+                    logActivity('student', (int) $authUser, 'Student Login', "Student with email '{$this->email}' logged in successfully.");
                     return redirect()->route('student.dashboard');
                 }
             }else {

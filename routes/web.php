@@ -15,6 +15,7 @@ use App\Livewire\StudentsTestResults;
 use App\Livewire\PreviousClass;
 use App\Livewire\ClassView;
 use App\Livewire\TeacherDashboard;
+use App\Livewire\ViewActivityLogs;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,10 @@ Route::middleware(['auth:student'])->group(function () {
 });
 
 Route::get('/studentLogout', function () {
+    $authUser = auth()->guard('student')->user();
+    if ($authUser) {
+        logActivity('student', (int) $authUser->id, 'Student Logout', "Student name {$authUser->name}, email '{$authUser->email_address}' logged out successfully.");
+    }
     auth()->guard('student')->logout();
     return redirect()->route('student.login');
 })->name('student.logout');
@@ -62,9 +67,15 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('admin/view_upcoming_class', ViewUpcomingClass::class)->name('view.upcoming.class');
     Route::get('admin/view_question', ViewQuestions::class)->name('view.question');
     Route::get('admin/students_test_results', StudentsTestResults::class)->name('students.test.results');
+    Route::get('admin/view_activity_logs', ViewActivityLogs::class)->name('activity.logs');
 });
 
 Route::get('/logout', function () {
+    $authUser = auth()->guard('admin')->user();
+    if ($authUser) {
+        logActivity('admin', (int) $authUser->id, 'Admin Logout', "Admin with email '{$authUser->email}' logged out successfully."
+        );
+    }
     auth()->guard('admin')->logout();
     return redirect()->route('admin.login');
 })->name('admin.logout');
@@ -78,6 +89,10 @@ Route::middleware(['auth:teacher'])->group(function () {
 });
 
 Route::get('/teacherLogout', function () {
+    $authUser = auth()->guard('teacher')->user();
+    if ($authUser) {
+        logActivity('teacher', (int) $authUser->id, 'Teacher Logout', "Teacher name {$authUser->name}, email '{$authUser->email}' logged out successfully.");
+    }
     auth()->guard('teacher')->logout();
     return redirect()->route('teacher.login');
 })->name('teacher.logout');

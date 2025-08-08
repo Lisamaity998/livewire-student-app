@@ -9,6 +9,8 @@ use App\Models\Course;
 use App\Models\Teacher;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
+use App\Events\ClassMaterialUploadedNotification;
+use App\Models\StudentInformation;
 
 class ViewUpcomingClass extends Component
 {
@@ -71,6 +73,11 @@ class ViewUpcomingClass extends Component
         if ($class) {
             $class->delete();
             $this->refreshUpcomingClasses();
+            // Log the activity
+            $authUser = auth()->guard('admin')->id();
+            $className = $class->class_name;
+            $classDate = $class->start_date;
+            logActivity('admin', (int) $authUser, 'Class Deleted', "Class '{$className}' scheduled on {$classDate} has been deleted.");
             session()->flash('success', 'Class deleted successfully!');
         } else {
             session()->flash('error', 'Class not found.');
@@ -110,22 +117,12 @@ class ViewUpcomingClass extends Component
 
     public function updateClass()
     {
-        // dd($this->video);
         try{
 
             $this->validate();
     
-            // if ($this->video && $this->video->getSize() > 20480) { 
-            //     session()->flash('error', 'Video File too large. Maximum size is 20MB.');
-            //     return;
-            // }
-    
-            // if ($this->notes && $this->notes->getSize() > 10240) {
-            //     session()->flash('error', 'Notes File too large. Maximum size is 10MB.');
-            //     return;
-            // }
-    
             $class = NewClass::find($this->selectedClassId);
+            $materialsUpdated = false;
     
             if (!$class) {
                 session()->flash('error', 'Class not found.');
@@ -140,23 +137,52 @@ class ViewUpcomingClass extends Component
             if ($this->video) {
                 $class->video = $this->video->store('class_videos', 'public');
                 $this->video = null; // Reset after storing
+                $materialsUpdated = true;
             }
     
             if ($this->notes) {
                 $class->notes = $this->notes->store('class_notes', 'public');
                 $this->notes = null;
+                $materialsUpdated = true;
             }
     
             if($this->youtubeUrl){
                 $class->youtube_url = $this->youtubeUrl;
                 $this->youtubeUrl = null;
+                $materialsUpdated = true;
             }
     
             $class->save();
-    
+
+            if ($materialsUpdated) {
+                // Notify students about the new materials
+                $className = $class->class_name;
+                $date = $class->start_date;
+
+                $users = StudentInformation::where('status', 'approved')
+                    ->where('course', 'LIKE', "%{$class->course->name}%")
+                    ->get();
+
+                foreach ($users as $user) {
+                    try {
+                        $message = "New materials uploaded for '{$className}' happened on {$date}";
+                        $userId = $user->id;
+
+                        event(new ClassMaterialUploadedNotification($message, $userId));
+                    } catch (\Exception $e) {
+                        session()->flash('error', 'Failed to send email: ' . $e->getMessage());
+                    }
+                }
+            }
+
             session()->flash('success', 'Class updated successfully!');
             $this->dispatch('closeEditClassModal');
             $this->refreshUpcomingClasses();
+            // Log the activity
+            $authUser = auth()->guard('admin')->id();
+            $courseName = Course::find($this->course_id)->name;
+            $teacher = Teacher::find($this->teacher_id);
+            logActivity('admin', (int) $authUser, 'Class Updated', "Class '{$this->class_name}' scheduled on {$this->selected_date} has been updated. Course name {$courseName}, asigned teacher is {$teacher->name}.");
             $this->reset(['selectedClassId', 'class_name', 'course_id', 'selected_date', 'class_time', 'teacher_id', 'video', 'notes', 'youtubeUrl']);
         }catch (\Illuminate\Validation\ValidationException $e) {
             session()->flash('error', 'Failed to update class: ' . $e->getMessage());

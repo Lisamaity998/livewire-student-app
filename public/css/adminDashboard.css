@@ -120,7 +120,9 @@ body {
     border-radius: 10px;
     border: 1px solid #dee2e6;
     padding: 15px;
-    width: 250px;
+    width: 280px;
+    max-height: 16rem;
+    overflow-y: auto;
     display: none; /* Initially hidden */
     z-index: 1001;
 }

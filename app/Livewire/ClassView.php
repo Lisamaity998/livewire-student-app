@@ -24,7 +24,7 @@ class ClassView extends Component
         $this->class = NewClass::findOrFail($id);
         $classCourseName = $this->class->course->name ?? null;
         // Check if the course name exists in the student's course list
-        $isEnrolled = in_array($classCourseName, $studentCourses);
+        $isEnrolled = in_array($classCourseName, $studentCourses); // in_array is case-sensitive, so ensure the course names match exactly
 
         // Check if attendance is marked
         $hasMarkedAttendance = $student->id && ClassAttendance::where('class_id', $this->class->id)

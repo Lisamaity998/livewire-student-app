@@ -171,6 +171,11 @@ class ViewQuestions extends Component
             $question = Questions::find($id);
             if ($question) {
                 $question->delete();
+                // Log the activity
+                $authUser = auth()->guard('admin')->id();
+                $questionName = $question->question_name;
+                $courseName = Course::find($question->course_id)->name;
+                logActivity('admin', (int) $authUser, 'Question Deleted', "Question '{$questionName}' from course '{$courseName}' has been deleted.");
                 $this->refreshQuestions();
                 session()->flash('success', 'Question deleted successfully!');
             } else {
@@ -226,7 +231,13 @@ class ViewQuestions extends Component
                     'answer4' => $this->answer4,
                     'correct_answer' => $this->correct_answer,
                 ]);
-                
+
+                // Log the activity
+                $authUser = auth()->guard('admin')->id();
+                $courseName = Course::find($this->course_id)->name;
+                $courseName = Course::find($question->course_id)->name;
+                logActivity('admin', (int) $authUser, 'Question Updated', "Question '{$this->question_name}' from course  {$courseName} has been updated.");
+
                 // Reset form
                 $this->resetUpdateForm();
 

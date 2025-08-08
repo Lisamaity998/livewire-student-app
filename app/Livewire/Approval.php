@@ -16,6 +16,8 @@ class Approval extends Component
             $item = StudentInformation::find($id);
             $item->status = 'approved';
             $item->save();
+            $authUser = auth()->guard('admin')->id();
+            logActivity('admin', (int) $authUser, 'Student Approved', "Student with ID '{$item->name}' has been approved.");
             session()->flash('success', 'Student approved successfully!');
         } catch (\Exception $e) { 
             session()->flash('error', 'There was an error approving the student.');
@@ -29,6 +31,8 @@ class Approval extends Component
             $item = StudentInformation::find($id);
             $item->status = 'rejected';
             $item->save();
+            $authUser = auth()->guard('admin')->id();
+            logActivity('admin', (int) $authUser, 'Student Rejected', "Student with ID '{$item->name}' has been rejected.");
             session()->flash('success', 'Student rejected successfully!');
         } catch (\Exception $e) {
             session()->flash('error', 'There was an error rejecting the student.');

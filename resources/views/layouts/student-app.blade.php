@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{-- <meta name="csrf-token" content="{{ csrf_token() }}"> --}}
     <title>Student Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
@@ -52,28 +53,24 @@
         </div>
     </div>
 
-    @php
-        $notifications = Auth::user()->unreadNotifications;
-    @endphp
-
     <div class="top-navbar d-flex justify-content-between align-items-center px-4 shadow-sm position-relative">
-        <span class="fw-bold">Welcome, {{ Auth::user()->name }}</span>
+        <span class="fw-bold">Welcome, {{ Auth::guard('student')->user()->name }}</span>
 
         <div class="notification-wrapper position-relative">
             <i class="bi bi-bell-fill fs-5 cursor-pointer" id="notificationToggle"></i>
+            <span id="notificationDot" 
+                class="position-absolute bg-danger border border-light rounded-circle d-none"
+                style="width:10px; height:10px; top: -2px; right: -2px;">
+            </span>
 
             <!-- Notification Dropdown -->
             <div class="notification-dropdown shadow" id="notificationDropdown">
                 <p class="mb-1 fw-bold">Notifications</p>
                 <hr class="mt-0 mb-2">
 
-                @forelse ($notifications as $note)
-                    <div class="notification-item">
-                        📢 {{ $note->data['message'] }} <a href="{{ route('markasred', $note->id) }}"><i class="fa-solid fa-x text-danger"></i></a>
-                    </div>
-                @empty
-                    <div class="notification-item">No new notifications.</div>
-                @endforelse
+                <div id="notificationList">
+                    <div class="notification-item" id="noNotifications">No new notifications.</div>
+                </div>
             </div>
         </div>
     </div>
@@ -128,6 +125,68 @@
  
         // Also handle Livewire content updates
         document.addEventListener('livewire:load', initializeDOM);
+    </script>
+
+    <script>
+        const userId = {{ auth()->guard('student')->user()->id }};
+    </script>
+
+    <script>
+        {!! Vite::content('resources/js/app.js') !!}
+    </script>
+
+    <script type="text/javascript">
+        Echo.private(`user.${userId}`)
+            .listen('.new-class-created', (e) => {
+                showNotification(e.message)
+            })
+            .listen('.class-material-uploaded', (e) => {
+                showNotification(e.message)
+            })
+            .listen('.class-reminder', (e) => {
+                showNotification(e.message)
+            });
+
+        function showNotification(message) {
+            const container = document.getElementById('notificationList');
+            const emptyMsg = document.getElementById('noNotifications');
+
+            // Remove "No new notifications" if it's still there
+            if (emptyMsg) emptyMsg.remove();
+
+            const notificationHTML = `
+                <div class="notification-item">📢 ${message} <i class="fa-solid fa-x text-danger close-notification" style="cursor: pointer;"></i></div>
+            `;
+
+            container.insertAdjacentHTML('afterbegin', notificationHTML);
+            updateNotificationDot();
+        }
+
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('close-notification')) {
+                const notificationItem = event.target.closest('.notification-item');
+                if (notificationItem) {
+                    notificationItem.remove();
+                }
+
+                const container = document.getElementById('notificationList');
+                if (container.children.length === 0) {
+                    container.innerHTML = `<div class="notification-item" id="noNotifications">No new notifications.</div>`;
+                }
+            }
+            updateNotificationDot();
+        });
+
+        function updateNotificationDot() {
+            const dot = document.getElementById('notificationDot');
+            const noNotifications = document.getElementById('noNotifications');
+
+            if (!noNotifications) {
+                dot.classList.remove('d-none'); 
+            } else {
+                dot.classList.add('d-none'); 
+            }
+        }
     </script>
 </body>
 </html>

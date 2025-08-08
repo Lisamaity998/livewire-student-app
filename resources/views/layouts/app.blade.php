@@ -21,6 +21,7 @@
             <li><a href="{{ route('view.upcoming.class') }}" class="{{ request()->routeIs('view.upcoming.class') ? 'active' : '' }}" wire:navigate>Class</a></li>
             <li><a href="{{ route('view.question') }}" class="{{ request()->routeIs('view.question') ? 'active' : '' }}" wire:navigate>Question</a></li>
             <li><a href="{{ route('students.test.results') }}" class="{{ request()->routeIs('students.test.results') ? 'active' : '' }}" wire:navigate>Students Test Results</a></li>
+            <li><a href="{{ route('activity.logs') }}" class="{{ request()->routeIs('activity.logs') ? 'active' : '' }}" wire:navigate>Activity Logs</a></li>
         </ul>
         <div class="sidebar-footer">
             <form>

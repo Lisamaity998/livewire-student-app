@@ -24,6 +24,8 @@ class TeacherLogin extends Component
         ];
     
         if (auth()->guard('teacher')->attempt($credentials)) {
+            $authUser = auth()->guard('teacher')->id();
+            logActivity('teacher', (int) $authUser, 'Teacher Login', "Teacher with email '{$this->email}' logged in successfully.");
             return redirect()->route('teacher.dashboard');
         } else {
             session()->flash('error', 'Invalid email or password.');
