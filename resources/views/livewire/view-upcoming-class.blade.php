@@ -119,7 +119,7 @@
 
                             <div class="form-group mb-3">
                                 <label for="ChooseDate">Choose Date</label>
-                                <input type="date" id="ChooseDate" wire:model.lazy="selected_date" min="{{ now()->toDateString() }}" class="form-control">
+                                <input type="date" id="ChooseDate" wire:model.lazy="selected_date" min="{{ now()->toDateString() }}" class="form-control" {{ $isEditable ? '' : 'disabled' }}>
                                 @error('selected_date') 
                                     <p class="text-danger">{{ $message }}</p>
                                 @enderror
@@ -127,7 +127,7 @@
 
                             <div class="form-group mb-3">
                                 <label for="classTime">Choose Time</label>
-                                <input type="time" id="classTime" wire:model.lazy="class_time" class="form-control">
+                                <input type="time" id="classTime" wire:model.lazy="class_time" class="form-control" {{ $isEditable ? '' : 'disabled' }}>
                                 @error('class_time') 
                                     <p class="text-danger">{{ $message }}</p>
                                 @enderror
@@ -136,7 +136,7 @@
                             @if(!empty($teachers))
                                 <div class="form-group mb-3">
                                     <label for="teacherSelect">Select a Teacher</label>
-                                    <select id="teacherSelect" class="form-select teacherSelect" wire:model="teacher_id">
+                                    <select id="teacherSelect" class="form-select teacherSelect" wire:model="teacher_id" {{ $isEditable ? '' : 'disabled' }}>
                                         <option value="">-- Choose a teacher --</option>
                                         @forelse($teachers as $teacher)
                                             <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
@@ -153,29 +153,44 @@
                             @endif
 
                             {{-- Optional File Uploads --}}
-                            <div class="form-group mb-3">
-                                <label for="videoUpload">Upload Video (Optional)</label>
-                                <input type="file" id="videoUpload" class="form-control" wire:model="video" accept="video/*">
-                                @error('video')
-                                    <p class="text-danger">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            @php
+                                $classStart = \Carbon\Carbon::parse($selected_date . ' ' . $class_time);
+                                $uploadWindowStart = $classStart->copy()->subMinutes(15);
+                                $uploadWindowEnd = $classStart->copy()->endOfDay();
+                            @endphp
 
-                            <div class="form-group mb-3">
-                                <label for="notesUpload">Upload Notes (Optional)</label>
-                                <input type="file" id="notesUpload" class="form-control" wire:model="notes" accept=".pdf">
-                                @error('notes')
-                                    <p class="text-danger">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            @if(now()->between($uploadWindowStart, $uploadWindowEnd))
+                                {{-- Video Upload --}}
+                                <div class="form-group mb-3">
+                                    <label for="videoUpload">Upload Video (Optional)</label>
+                                    <input type="file" id="videoUpload" class="form-control" wire:model="video" accept="video/*">
+                                    @error('video') 
+                                        <p class="text-danger">{{ $message }}</p> 
+                                    @enderror
+                                </div>
 
-                            <div class="form-group mb-3">
-                                <label for="youtubeUrl">YouTube Video URL (Optional):</label>
-                                <input type="text" id="youtubeUrl" wire:model.lazy="youtubeUrl" class="form-control" placeholder="Enter YouTube video URL">
-                                @error('youtubeUrl')
-                                    <p class="text-danger">{{ $message }}</p>
-                                @enderror
-                            </div>
+                                {{-- Notes Upload --}}
+                                <div class="form-group mb-3">
+                                    <label for="notesUpload">Upload Notes (Optional)</label>
+                                    <input type="file" id="notesUpload" class="form-control" wire:model="notes" accept=".pdf">
+                                    @error('notes') 
+                                        <p class="text-danger">{{ $message }}</p> 
+                                    @enderror
+                                </div>
+
+                                {{-- YouTube URL --}}
+                                <div class="form-group mb-3">
+                                    <label for="youtubeUrl">YouTube Video URL (Optional):</label>
+                                    <input type="text" id="youtubeUrl" wire:model.lazy="youtubeUrl" class="form-control" placeholder="Enter YouTube video URL">
+                                    @error('youtubeUrl') 
+                                        <p class="text-danger">{{ $message }}</p> 
+                                    @enderror
+                                </div>
+                            @else
+                                <div class="alert alert-warning">
+                                    Material uploads are only allowed from {{ $uploadWindowStart->format('d M Y h:i A') }} until end of the same day.
+                                </div>
+                            @endif
 
                             <div class="d-flex justify-content-center align-items-center">
                                 <button type="submit" class="btn btn-primary mt-3">Update Class</button>

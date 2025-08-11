@@ -12,6 +12,7 @@ use Livewire\WithFileUploads;
 use App\Events\ClassMaterialUploadedNotification;
 use App\Events\ClassDeletedNotification;
 use App\Models\StudentInformation;
+use Illuminate\Support\Carbon;
 
 class ViewUpcomingClass extends Component
 {
@@ -24,6 +25,8 @@ class ViewUpcomingClass extends Component
     public $selectedClassId;
     public $class_name;
     public $course_id;
+
+    public $isEditable = true;
 
     #[Validate('required|date|after_or_equal:today')]
     public $selected_date;
@@ -72,7 +75,7 @@ class ViewUpcomingClass extends Component
     {
         $class = NewClass::find($classId);
         if ($class) {
-            
+
             // Notify students about the class deletion
             $users = StudentInformation::where('status', 'approved')
                 ->where('course', 'LIKE', "%{$class->course->name}%")
@@ -129,6 +132,12 @@ class ViewUpcomingClass extends Component
         $this->teachers = Teacher::where('skills', 'LIKE', "%{$class->course->name}%")->get();
         $this->teacher_id = $class->teacher_id;
 
+        // Check if editable: allow until day before class date
+        $today = now()->startOfDay();
+        $classDate = \Carbon\Carbon::parse($class->start_date)->startOfDay();
+
+        $this->isEditable = $today->lessThan($classDate);
+
         $this->dispatch('openEditClassModal', teacherId: $this->teacher_id);
     }
 
@@ -150,28 +159,43 @@ class ViewUpcomingClass extends Component
                 session()->flash('error', 'Class not found.');
                 return;
             }
-    
+
             $class->start_date = $this->selected_date;
             $class->class_time = $this->class_time;
             $class->teacher_id = $this->teacher_id;
-    
+
             // Optional file updates
-            if ($this->video) {
-                $class->video = $this->video->store('class_videos', 'public');
-                $this->video = null; // Reset after storing
-                $materialsUpdated = true;
-            }
-    
-            if ($this->notes) {
-                $class->notes = $this->notes->store('class_notes', 'public');
-                $this->notes = null;
-                $materialsUpdated = true;
-            }
-    
-            if($this->youtubeUrl){
-                $class->youtube_url = $this->youtubeUrl;
-                $this->youtubeUrl = null;
-                $materialsUpdated = true;
+            if ($this->video || $this->notes || $this->youtubeUrl) {
+                $classStart = Carbon::parse($class->start_date . ' ' . $class->class_time);
+                $uploadWindowStart = $classStart->copy()->subMinutes(15);
+                $uploadWindowEnd = $classStart->copy()->endOfDay();
+
+                $now = now();
+
+                if ($now->lt($uploadWindowStart) || $now->gt($uploadWindowEnd)) {
+                    session()->flash('error', 'You can only upload class materials between '
+                        . $uploadWindowStart->format('d M Y h:i A') . ' and '
+                        . $uploadWindowEnd->format('d M Y h:i A'));
+                    return;
+                }
+                     
+                if ($this->video) {
+                    $class->video = $this->video->store('class_videos', 'public');
+                    $this->video = null; // Reset after storing
+                    $materialsUpdated = true;
+                }
+        
+                if ($this->notes) {
+                    $class->notes = $this->notes->store('class_notes', 'public');
+                    $this->notes = null;
+                    $materialsUpdated = true;
+                }
+        
+                if($this->youtubeUrl){
+                    $class->youtube_url = $this->youtubeUrl;
+                    $this->youtubeUrl = null;
+                    $materialsUpdated = true;
+                }
             }
     
             $class->save();
@@ -179,7 +203,7 @@ class ViewUpcomingClass extends Component
             if ($materialsUpdated) {
                 // Notify students about the new materials
                 $className = $class->class_name;
-                $date = $class->start_date;
+                $time = $class->class_time;
 
                 $users = StudentInformation::where('status', 'approved')
                     ->where('course', 'LIKE', "%{$class->course->name}%")
@@ -190,7 +214,7 @@ class ViewUpcomingClass extends Component
                         $message = [
                             'type' => 'upload', 
                             'title' => "Class Materials Uploaded",
-                            'description' => "Learning materials have been uploaded for your upcoming '{$className}' scheduled on {$date}."
+                            'description' => "Learning materials have been uploaded for your upcoming '{$className}'  scheduled today at {$time}."
                         ];
                         $userId = $user->id;
 

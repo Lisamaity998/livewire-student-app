@@ -148,7 +148,7 @@
         };
 
         const notificationRoutes = {
-            upload: "{{ route('upcoming.class') }}",
+            upload: "{{ route('live.class') }}",
             schedule: "{{ route('upcoming.class') }}",
             reminder: "{{ route('live.class') }}",
             mockTest: "{{ route('mock.test') }}"
@@ -180,22 +180,21 @@
 
             const { icon, color } = icons[type] || { icon: "bi-info-circle-fill", color: "text-secondary" };
 
-            let linkHTML = "";
-            // Add link only if type is in notificationRoutes
-            if (notificationRoutes[type]) {
-                linkHTML = `<a href="${notificationRoutes[type]}" class="ms-1 text-primary fw-bold" wire:navigate style="text-decoration:none;">Click here</a>`;
-            }
+            // Use the route if available, else empty string
+            const link = notificationRoutes[type] || "#";
 
             const notificationHTML = `
                 <div class="notification-item">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-start">
-                            <i class="bi ${icon} ${color} me-3 fs-5"></i>
-                            <div>
-                                <div class="fw-semibold">${title}</div>
-                                <div class="small text-muted">${description} ${linkHTML}</div>
+                        <a href="${link}" wire:navigate style="text-decoration:none; color:inherit;">
+                            <div class="d-flex align-items-start">
+                                <i class="bi ${icon} ${color} me-3 fs-5"></i>
+                                <div>
+                                    <div class="fw-semibold">${title}</div>
+                                    <div class="small text-muted">${description}</div>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                         <i class="fa-solid fa-xmark close-notification"></i>
                     </div>
                 </div>

@@ -32,7 +32,13 @@
                 </thead>
                 <tbody>
                     @foreach ($upcomingClasses as $class)
-                        <tr>                
+                        @php
+                            $classStart = \Carbon\Carbon::parse($class->start_date . ' ' . $class->class_time);
+                            $timeDifference = now()->between($classStart->copy()->subMinutes(15), $classStart);
+                            $materialsUploaded = !empty($class->video) || !empty($class->notes) || !empty($class->youtube_url);
+                        @endphp
+
+                        <tr @if($materialsUploaded && $timeDifference) style="background-color: #f2f2f2;" @endif>                
                             <td>{{ $class->class_name }}</td>
                             <td>{{ $class->teacher->name ?? 'N/A' }}</td>
                             <td>{{ \Carbon\Carbon::parse($class->start_date)->format('d M Y') }}</td>
