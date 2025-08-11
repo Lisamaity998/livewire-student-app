@@ -57,19 +57,22 @@
         <span class="fw-bold">Welcome, {{ Auth::guard('student')->user()->name }}</span>
 
         <div class="notification-wrapper position-relative">
-            <i class="bi bi-bell-fill fs-5 cursor-pointer" id="notificationToggle"></i>
+            <i class="bi bi-bell-fill fs-5 text-dark" id="notificationToggle" style="cursor: pointer;"></i>
             <span id="notificationDot" 
                 class="position-absolute bg-danger border border-light rounded-circle d-none"
                 style="width:10px; height:10px; top: -2px; right: -2px;">
             </span>
 
             <!-- Notification Dropdown -->
-            <div class="notification-dropdown shadow" id="notificationDropdown">
-                <p class="mb-1 fw-bold">Notifications</p>
+            <div class="notification-dropdown shadow-sm" id="notificationDropdown">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <p class="mb-0 fw-bold text-primary">Notifications</p>
+                    <small id="clearAllNotifications" class="text-muted " style="font-size: 0.8rem; cursor: pointer;">Clear All</small>
+                </div>
                 <hr class="mt-0 mb-2">
 
                 <div id="notificationList">
-                    <div class="notification-item" id="noNotifications">No new notifications.</div>
+                    <div class="notification-item align-item-center justify-content-center text-muted py-1" id="noNotifications">No new notifications.</div>
                 </div>
             </div>
         </div>
@@ -136,26 +139,66 @@
     </script>
 
     <script type="text/javascript">
+        const icons = {
+            reminder: { icon: "bi-megaphone-fill", color: "text-primary" },
+            upload: { icon: "bi-file-earmark-arrow-up-fill", color: "text-success" },
+            schedule: { icon: "bi-calendar-event-fill", color: "text-warning" },
+            mockTest: { icon: "bi-clipboard-check-fill", color: "text-info" },
+            classCancelled: { icon: "bi-calendar-x-fill", color: "text-danger" }
+        };
+
+        const notificationRoutes = {
+            upload: "{{ route('upcoming.class') }}",
+            schedule: "{{ route('upcoming.class') }}",
+            reminder: "{{ route('live.class') }}",
+            mockTest: "{{ route('mock.test') }}"
+        };
+
         Echo.private(`user.${userId}`)
             .listen('.new-class-created', (e) => {
-                showNotification(e.message)
+                showNotification(e.message.type, e.message.title, e.message.description)
             })
             .listen('.class-material-uploaded', (e) => {
-                showNotification(e.message)
+                showNotification(e.message.type, e.message.title, e.message.description)
             })
             .listen('.class-reminder', (e) => {
-                showNotification(e.message)
+                showNotification(e.message.type, e.message.title, e.message.description)
+            })
+            .listen('.mock-test-notification', (e) => {
+                showNotification(e.message.type, e.message.title, e.message.description)
+            })
+            .listen('.class-deleted-notification', (e) => {
+                showNotification(e.message.type, e.message.title, e.message.description)
             });
 
-        function showNotification(message) {
+        function showNotification(type, title, description) {
             const container = document.getElementById('notificationList');
             const emptyMsg = document.getElementById('noNotifications');
 
             // Remove "No new notifications" if it's still there
             if (emptyMsg) emptyMsg.remove();
 
+            const { icon, color } = icons[type] || { icon: "bi-info-circle-fill", color: "text-secondary" };
+
+            let linkHTML = "";
+            // Add link only if type is in notificationRoutes
+            if (notificationRoutes[type]) {
+                linkHTML = `<a href="${notificationRoutes[type]}" class="ms-1 text-primary fw-bold" wire:navigate style="text-decoration:none;">Click here</a>`;
+            }
+
             const notificationHTML = `
-                <div class="notification-item">📢 ${message} <i class="fa-solid fa-x text-danger close-notification" style="cursor: pointer;"></i></div>
+                <div class="notification-item">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-start">
+                            <i class="bi ${icon} ${color} me-3 fs-5"></i>
+                            <div>
+                                <div class="fw-semibold">${title}</div>
+                                <div class="small text-muted">${description} ${linkHTML}</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-xmark close-notification"></i>
+                    </div>
+                </div>
             `;
 
             container.insertAdjacentHTML('afterbegin', notificationHTML);
@@ -171,10 +214,15 @@
 
                 const container = document.getElementById('notificationList');
                 if (container.children.length === 0) {
-                    container.innerHTML = `<div class="notification-item" id="noNotifications">No new notifications.</div>`;
+                    container.innerHTML = `<div class="notification-item align-item-center justify-content-center text-muted py-1" id="noNotifications">No new notifications.</div>`;
                 }
             }
             updateNotificationDot();
+        });
+
+        document.getElementById('clearAllNotifications').addEventListener('click', function () {
+            const container = document.getElementById('notificationList');
+            container.innerHTML = `<div class="notification-item align-item-center justify-content-center text-muted py-1" id="noNotifications">No new notifications.</div>`;
         });
 
         function updateNotificationDot() {

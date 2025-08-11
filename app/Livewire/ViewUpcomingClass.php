@@ -10,6 +10,7 @@ use App\Models\Teacher;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use App\Events\ClassMaterialUploadedNotification;
+use App\Events\ClassDeletedNotification;
 use App\Models\StudentInformation;
 
 class ViewUpcomingClass extends Component
@@ -71,13 +72,34 @@ class ViewUpcomingClass extends Component
     {
         $class = NewClass::find($classId);
         if ($class) {
-            $class->delete();
-            $this->refreshUpcomingClasses();
+            
+            // Notify students about the class deletion
+            $users = StudentInformation::where('status', 'approved')
+                ->where('course', 'LIKE', "%{$class->course->name}%")
+                ->get();
+            $teacherName = Teacher::find($class->teacher_id)->name ?? '';
+            foreach ($users as $user) {
+                try {
+                    $message = [
+                        'type' => 'classCancelled',
+                        'title' => "Class Cancelled",
+                        'description' => "The '{$class->class_name}' scheduled for {$class->start_date} at {$class->class_time}, taught by {$teacherName}, has been cancelled."
+                    ];
+                    $userId = $user->id;
+                    event(new ClassDeletedNotification($message, $userId));
+                } catch (\Exception $e) {
+                    session()->flash('error', 'Failed to send notification: ' . $e->getMessage());
+                }
+            }
+
             // Log the activity
             $authUser = auth()->guard('admin')->id();
             $className = $class->class_name;
             $classDate = $class->start_date;
-            logActivity('admin', (int) $authUser, 'Class Deleted', "Class '{$className}' scheduled on {$classDate} has been deleted.");
+            logActivity('admin', (int) $authUser, 'Class Deleted', "'{$className}' scheduled on {$classDate} has been deleted.");
+
+            $class->delete();
+            $this->refreshUpcomingClasses();
             session()->flash('success', 'Class deleted successfully!');
         } else {
             session()->flash('error', 'Class not found.');
@@ -165,7 +187,11 @@ class ViewUpcomingClass extends Component
 
                 foreach ($users as $user) {
                     try {
-                        $message = "New materials uploaded for '{$className}' happened on {$date}";
+                        $message = [
+                            'type' => 'upload', 
+                            'title' => "Class Materials Uploaded",
+                            'description' => "Learning materials have been uploaded for your upcoming '{$className}' scheduled on {$date}."
+                        ];
                         $userId = $user->id;
 
                         event(new ClassMaterialUploadedNotification($message, $userId));
@@ -182,7 +208,7 @@ class ViewUpcomingClass extends Component
             $authUser = auth()->guard('admin')->id();
             $courseName = Course::find($this->course_id)->name;
             $teacher = Teacher::find($this->teacher_id);
-            logActivity('admin', (int) $authUser, 'Class Updated', "Class '{$this->class_name}' scheduled on {$this->selected_date} has been updated. Course name {$courseName}, asigned teacher is {$teacher->name}.");
+            logActivity('admin', (int) $authUser, 'Class Updated', "'{$this->class_name}' scheduled on {$this->selected_date} has been updated. Course name {$courseName}, asigned teacher is {$teacher->name}.");
             $this->reset(['selectedClassId', 'class_name', 'course_id', 'selected_date', 'class_time', 'teacher_id', 'video', 'notes', 'youtubeUrl']);
         }catch (\Illuminate\Validation\ValidationException $e) {
             session()->flash('error', 'Failed to update class: ' . $e->getMessage());

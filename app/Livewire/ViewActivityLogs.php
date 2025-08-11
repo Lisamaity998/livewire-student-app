@@ -27,8 +27,9 @@ class ViewActivityLogs extends Component
         // Attach user_name using Eloquent
         foreach ($logs as $log) {
             if ($log->user_role === 'admin') {
-                $admin = Admin::find($log->user_id);
-                $log->user_name = $admin ? $admin->name : 'Unknown Admin';
+                // $admin = Admin::find($log->user_id);
+                // $log->user_name = $admin ? $admin->name : 'Unknown Admin';
+                $log->user_name = 'Admin';
             } elseif ($log->user_role === 'student') {
                 $student = StudentInformation::find($log->user_id);
                 $log->user_name = $student ? $student->name : 'Unknown Student';

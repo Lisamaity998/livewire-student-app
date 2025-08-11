@@ -35,8 +35,9 @@
             <tbody>
                 @forelse ($classes as $index => $class)
                     @php
-                        $classDateTime = \Carbon\Carbon::parse($class->start_date . ' ' . $class->class_time);
-                        $isPast = $classDateTime->isPast();
+                        $classDate = \Carbon\Carbon::parse($class->start_date)->startOfDay();
+                        $today = now()->startOfDay();
+                        $isPast = $today->lessThanOrEqualTo($classDate) ? false : true;
                     @endphp
                     <tr class="{{ $isPast ? 'table-danger' : '' }}">
                         <th scope="row">{{ $index + 1 }}</th>
@@ -51,11 +52,13 @@
                                 <a href="#" class="text-danger me-2" style="cursor: pointer" wire:click.prevent="deleteClass({{ $class->id }})">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
+
                                 @php
-                                    $classDateTime = \Carbon\Carbon::parse($class->start_date . ' ' . $class->class_time);
+                                    $classDate = \Carbon\Carbon::parse($class->start_date)->startOfDay();
+                                    $today = now()->startOfDay();
                                 @endphp
 
-                                @if (!$classDateTime->isPast())
+                                @if ($today->lessThanOrEqualTo($classDate))
                                     <a href="#" class="text-success me-2" style="cursor: pointer" wire:click.prevent="editClass({{ $class->id }})">
                                         <i class="fas fa-edit"></i>
                                     </a>

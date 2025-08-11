@@ -71,17 +71,21 @@ class AddNewClass extends Component
                 $users = StudentInformation::where('status', 'approved')->where('course', 'LIKE', "%{$course->name}%")->get();
                 foreach ($users as $user) {
                     try {
+                        // Send notification to the student using websockets
+                        $message = [
+                            'type' => 'schedule', 
+                            'title' => "New Class Scheduled",
+                            'description' => "A new '{$className}' has been scheduled for {$selectedDate} at {$this->class_time}, taught by {$teacher->name}."
+                        ];
+                        $userId = $user->id;
+
+                        event(new NewClassNotification($message, $userId));
+
                         // Your existing email logic
                         sendEmail($user, $className, $teacher->name, $selectedDate);
 
                         // New: Send notification to the student
                         $user->notify(new ClassCreatedNotification($newClassCreated));
-
-                        $message = "A new '{$className}' is scheduled on {$selectedDate} at {$this->class_time}, tought by {$teacher->name}";
-                        $userId = $user->id;
-
-                        event(new NewClassNotification($message, $userId));
-
                     } catch (\Exception $e) {
                         session()->flash('error', 'Failed to send email: ' . $e->getMessage());
                     }

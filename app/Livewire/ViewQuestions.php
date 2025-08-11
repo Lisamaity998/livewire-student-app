@@ -11,6 +11,8 @@ use Livewire\Attributes\On;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Events\MockTestNotification;
+use App\Models\StudentInformation;
 
 class ViewQuestions extends Component
 {
@@ -143,8 +145,31 @@ class ViewQuestions extends Component
                 }
 
                 Questions::create($data);
+                $courseName = Course::find($course_id)->name;
+                $questionCount = Questions::where('course_id', $course_id)->count();
+                if ($questionCount == 10) {
+                    $users = StudentInformation::where('status', 'approved')->where('course', 'LIKE', "%{$courseName}%")->get();
+                    foreach ($users as $user) {
+                        try {
+                            // Send notification to the student using websockets
+                            $message = [
+                                'type' => 'mockTest',
+                                'title' => "New Mock Test Available",
+                                'description' => "A mock test for '{$courseName}' is now available. Take the test whenever you are free."
+                            ];
+                            $userId = $user->id;
+                            event(new MockTestNotification($message, $userId));
+                        } catch (\Exception $e) {
+                            session()->flash('error', 'Failed to send email: ' . $e->getMessage());
+                        }
+                    }
+                }
                 $inserted++;
             }
+
+            // Log the activity
+            $authUser = auth()->guard('admin')->id();
+            logActivity('admin', (int) $authUser, 'Bulk Questions Uploaded', "Bulk {$courses->name} question upload completed. Inserted: {$inserted}, Skipped: {$skipped}");
 
             DB::commit();
             session()->flash('success', "Upload successful! Inserted: $inserted, Skipped: $skipped");

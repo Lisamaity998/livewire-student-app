@@ -47,7 +47,11 @@ class SendClassReminder extends Command
                 foreach ($users as $user) {
 
                     $userId = $user->id;
-                    $message = "Reminder: Your '{$class->class_name}' class starts at {$class->class_time}";
+                    $message = [
+                        'type' => 'reminder', 
+                        'title' => "Class Reminder",
+                        'description' => "Your '{$class->class_name}' starts at {$class->class_time}."
+                    ];
 
                     event(new ClassReminderNotification($message, $userId));
                 }

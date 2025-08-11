@@ -6,8 +6,10 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Questions;
 use App\Models\Course;
+use App\Models\StudentInformation;
 use Livewire\Attributes\Validate;
 use Livewire\Attributes\On;
+use App\Events\MockTestNotification;
 
 class QuestionEntry extends Component
 {
@@ -44,6 +46,16 @@ class QuestionEntry extends Component
     {
         try {
             $this->validate();
+
+            // Check for duplicate question in the same course
+            $exists = Questions::where('course_id', $this->course_id)
+                ->where('question_name', $this->question_name)
+                ->exists();
+
+            if ($exists) {
+                session()->flash('error', 'This question already exists in the selected course.');
+                return;
+            }
             
             Questions::create([
                 'course_id' => $this->course_id,
@@ -54,9 +66,29 @@ class QuestionEntry extends Component
                 'answer4' => $this->answer4,
                 'correct_answer' => $this->correct_answer,
             ]);
+            $courseName = Course::find($this->course_id)->name;
+
+            // Notify the user
+            $questionCount = Questions::where('course_id', $this->course_id)->count();
+            if($questionCount == 10) {
+                $users = StudentInformation::where('status', 'approved')->where('course', 'LIKE', "%{$courseName}%")->get();
+                foreach ($users as $user) {
+                    try {
+                        // Send notification to the student using websockets
+                        $message = [
+                            'type' => 'mockTest',
+                            'title' => "New Mock Test Available",
+                            'description' => "A mock test for '{$courseName}' is now available. Take the test whenever you are free."
+                        ];
+                        $userId = $user->id;
+                        event(new MockTestNotification($message, $userId));
+                    } catch (\Exception $e) {
+                        session()->flash('error', 'Failed to send email: ' . $e->getMessage());
+                    }
+                }
+            }
             // Log the activity
             $authUser = auth()->guard('admin')->id();
-            $courseName = Course::find($this->course_id)->name;
             logActivity('admin', (int) $authUser, 'Question Added', "A new question '{$this->question_name}' was added to course ID {$courseName}.");
             
             session()->flash('success', 'Question added successfully!');
