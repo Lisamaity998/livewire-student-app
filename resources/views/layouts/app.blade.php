@@ -20,6 +20,8 @@
             <li><a href="{{ route('student.list') }}" class="{{ request()->routeIs('student.list') ? 'active' : '' }}" wire:navigate>Student List</a></li>
             <li><a href="{{ route('view.upcoming.class') }}" class="{{ request()->routeIs('view.upcoming.class') ? 'active' : '' }}" wire:navigate>Class</a></li>
             <li><a href="{{ route('view.question') }}" class="{{ request()->routeIs('view.question') ? 'active' : '' }}" wire:navigate>Question</a></li>
+            <li><a href="{{ route('students.test.results') }}" class="{{ request()->routeIs('students.test.results') ? 'active' : '' }}" wire:navigate>Students Test Results</a></li>
+            <li><a href="{{ route('activity.logs') }}" class="{{ request()->routeIs('activity.logs') ? 'active' : '' }}" wire:navigate>Activity Logs</a></li>
         </ul>
         <div class="sidebar-footer">
             <form>
@@ -30,13 +32,14 @@
             </form>
         </div>
     </div>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <!-- Main Content -->
     <div class="main-content">
         {{$slot}}
     </div>
     
     @livewireScripts
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>

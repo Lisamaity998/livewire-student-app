@@ -5,17 +5,26 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Course;
-use App\Models\Teacher;
 use App\Models\StudentInformation;
 use App\Models\NewClass;
 use App\Models\ClassAttendance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\On;
 
 class UpcomingClass extends Component
 {
+    public $search = '';
     public $upcomingClasses = [];
     public $selectedClassId;
+
+    public $modalData = [
+        'className' => '',
+        'topic' => '',
+        'teacher' => '',
+        'date' => '',
+        'time' => ''
+    ];
 
     #[Layout('layouts.student-app')]
     public function render()
@@ -27,59 +36,92 @@ class UpcomingClass extends Component
 
             $courseIds = Course::whereIn('name', $studentCourses)->pluck('id');
 
+            $searchTerm = '%' . $this->search . '%';
+
             $this->upcomingClasses = NewClass::with(['teacher', 'course'])
                 ->whereIn('course_id', $courseIds)
                 ->whereDate('start_date', '>', now())
+                ->where(function ($query) use ($searchTerm) {
+                    $query->where('class_name', 'like', $searchTerm)
+                        ->orWhereHas('teacher', function ($teacherQuery) use ($searchTerm) {
+                            $teacherQuery->where('name', 'like', $searchTerm);
+                        });
+                })
                 ->orderBy('start_date')
+                ->orderBy('class_time')
                 ->get();
         }
 
         return view('livewire.upcoming-class');
     }
 
+
+    #[On('setSelectedClass')]
     public function setSelectedClass($classId)
     {
         $this->selectedClassId = $classId;
+        // Find the class and set modal data
+        $class = collect($this->upcomingClasses)->firstWhere('id', $classId);
+        if ($class) {
+            $this->modalData = [
+                'className' => $class->class_name,
+                'topic' => $class->course->name ?? 'N/A',
+                'teacher' => $class->teacher->name ?? 'N/A',
+                'date' => Carbon::parse($class->start_date)->format('d M Y'),
+                'time' => Carbon::parse($class->class_time)->format('h:i A')
+            ];
+        }
     }
 
     public function attendClass()
     {
-        $studentId = Auth::id();
-        if (!$this->selectedClassId || !$studentId) return;
+        try {
+            $studentId = Auth::id();
+            if (!$this->selectedClassId || !$studentId) return;
 
-        $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
-            ->where('student_id', $studentId)
-            ->first();
+            $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
+                ->where('student_id', $studentId)
+                ->first();
 
-        if (!$attendance) {
-            ClassAttendance::create([
-                'class_id' => $this->selectedClassId,
-                'student_id' => $studentId,
-                'attended' => '1',
-            ]);
-        } elseif ($attendance->attended === '0') {
-            $attendance->update(['attended' => '1']);
+            if (!$attendance) {
+                ClassAttendance::create([
+                    'class_id' => $this->selectedClassId,
+                    'student_id' => $studentId,
+                    'attended' => '1',
+                ]);
+            } elseif ($attendance->attended === '0') {
+                $attendance->update(['attended' => '1']);
+            }
+            session()->flash('success', 'You’ve successfully marked your interest to attend the class.');
+            $this->dispatch('closeClassModal');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Oops! We couldn’t save your interest to attend the class. Please try again later.');
         }
     }
 
     public function missClass()
     {
-        $studentId = Auth::id();
-        if (!$this->selectedClassId || !$studentId) return;
+        try{
+            $studentId = Auth::id();
+            if (!$this->selectedClassId || !$studentId) return;
 
-        $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
-            ->where('student_id', $studentId)
-            ->first();
+            $attendance = ClassAttendance::where('class_id', $this->selectedClassId)
+                ->where('student_id', $studentId)
+                ->first();
 
-        if (!$attendance) {
-            ClassAttendance::create([
-                'class_id' => $this->selectedClassId,
-                'student_id' => $studentId,
-                'attended' => '0',
-            ]);
-        } elseif ($attendance->attended === '1') {
-            $attendance->update(['attended' => '0']);
+            if (!$attendance) {
+                ClassAttendance::create([
+                    'class_id' => $this->selectedClassId,
+                    'student_id' => $studentId,
+                    'attended' => '0',
+                ]);
+            } elseif ($attendance->attended === '1') {
+                $attendance->update(['attended' => '0']);
+            }
+            session()->flash('warning', 'You’ve successfully marked your decision to miss the class.');
+            $this->dispatch('closeClassModal');
+        }catch (\Exception $e) {
+            session()->flash('error', 'Oops! We couldn’t save your decision to miss the class. Please try again later.');
         }
     }
-
 }

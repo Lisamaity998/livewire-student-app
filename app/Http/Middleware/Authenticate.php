@@ -21,6 +21,10 @@ class Authenticate extends Middleware
             if ($request->is('student/*')) {
                 return route('student.login');
             }
+
+            if ($request->is('teacher/*')) {
+                return route('teacher.login');
+            }
     
             // return route('login');
             abort(403, 'Unauthorized');

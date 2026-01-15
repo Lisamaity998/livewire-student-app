@@ -3,6 +3,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
+/* ==side bar== */
 .sidebar {
     height: 100vh;
     width: 280px;
@@ -77,6 +78,89 @@ body {
     padding: 10px 20px;
 }
 
+.submenu a {
+    padding: 12px 30px;
+    display: block;
+    color: #adb5bd;
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+
+.submenu a:hover {
+    background-color: #495057;
+    color: white;
+}
+
+.submenu a.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* ==top bar== */
+.top-navbar {
+    position: fixed;
+    top: 0;
+    margin-left: 280px;
+    right: 0;
+    height: 60px;
+    background-color: white;
+    z-index: 999;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.notification-wrapper {
+    position: relative;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+    width: 320px;
+    max-height: 20rem;
+    overflow-y: auto;
+    display: none; /* Initially hidden */
+    z-index: 1001;
+}
+
+.notification-dropdown .fw-semibold {
+    font-size: 0.95rem;
+}
+
+.notification-dropdown .small {
+    font-size: 0.8rem;
+}
+
+.notification-item {
+    padding: 10px 0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item i {
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.close-notification {
+    font-size: 1rem;
+    color: #dc2537;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    margin-left: 8px;
+}
+
+/* ==main content== */
 .main-content {
     margin-left: 280px;
     padding: 30px;
@@ -98,7 +182,7 @@ body {
 .student-table {
     background-color: white;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     padding: 20px;
     overflow-x: auto;

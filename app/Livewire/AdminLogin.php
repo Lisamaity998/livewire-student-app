@@ -26,6 +26,8 @@ class AdminLogin extends Component
         ];
     
         if (auth()->guard('admin')->attempt($credentials)) {
+            $authUser = auth()->guard('admin')->id();
+            logActivity('admin', (int) $authUser, 'Admin Login', "Admin with email '{$this->email}' logged in successfully.");
             return redirect()->route('approval');
         } else {
             session()->flash('error', 'Invalid email or password.');
